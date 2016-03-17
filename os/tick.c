@@ -5,9 +5,12 @@
  */
 
 #include "tick.h"
-#include "gpio.h"
 
+/* Global variables */
 uint16_t tick_sys;
+
+/* Function prototypes */
+void tick_interrupt(void);
 
 /*
  * System tick interrupt handler.
@@ -48,7 +51,8 @@ tick_init(void)
 
 /*
  * Returns 1 if the given timer counter is considered expired. Intended to be
- * used in a polling fashion.
+ * used in a polling fashion by tasks that can tolerate some sloppiness in
+ * periodicity.
  *
  * ASSUMPTIONS:
  * 1. All tick deadlines are set to be less than 0x8000 ticks in the future.

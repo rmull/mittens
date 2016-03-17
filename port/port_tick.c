@@ -1,23 +1,9 @@
 #include "port_tick.h"
+#include "port_clock.h"
 
 #ifdef API_TIVAWARE
 #include <stdbool.h>    // Required for sysctl.h
-#include "driverlib/sysctl.h"
 #include "driverlib/systick.h"
-
-/*
- * Note that this function refers to clock ticks, not the system tick that we
- * are generating from it.
- */
-uint32_t
-tick_port_ticks_per_ms(void)
-{
-    uint32_t hz;
-
-    hz = SysCtlClockGet();
-
-    return (hz / 1000);
-}
 
 /*
  * Specify period in milliseconds
@@ -25,7 +11,7 @@ tick_port_ticks_per_ms(void)
 void
 tick_port_period_set(uint32_t ms)
 {
-    SysTickPeriodSet(tick_port_ticks_per_ms() * ms);
+    SysTickPeriodSet(clock_port_ticks_per_ms() * ms);
 }
 
 void

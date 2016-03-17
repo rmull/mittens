@@ -19,18 +19,18 @@ port_gpio_set(enum gpio_id gpio, uint8_t level)
 {
     switch (gpio) {
     case GPIO_ID_LED_R:
-        GPIO_PORTF_DATA_R &= ~(1 << 1);
-        GPIO_PORTF_DATA_R |= (level << 1);
+        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 1));
+        GPIO_PORTF_DATA_R |= (uint32_t)(level << 1);
         break;
 
     case GPIO_ID_LED_B:
-        GPIO_PORTF_DATA_R &= ~(1 << 2);
-        GPIO_PORTF_DATA_R |= (level << 2);
+        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 2));
+        GPIO_PORTF_DATA_R |= (uint32_t)(level << 2);
         break;
 
     case GPIO_ID_LED_G:
-        GPIO_PORTF_DATA_R &= ~(1 << 3);
-        GPIO_PORTF_DATA_R |= (level << 3);
+        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 3));
+        GPIO_PORTF_DATA_R |= (uint32_t)(level << 3);
         break;
 
     default:
