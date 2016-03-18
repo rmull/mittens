@@ -7,7 +7,21 @@
 void
 clock_port_init(void)
 {
-    ;
+    uint32_t hz;
+
+    /* Use the internal 16MHz oscillator and disable the main oscillator */
+    SysCtlClockSet(SYSCTL_SYSDIV_2 | SYSCTL_USE_PLL | SYSCTL_OSC_INT | SYSCTL_MAIN_OSC_DIS);
+
+    /* Alternatively, use the external 16MHz crystal */
+    /* SysCtlClockSet(SYSCTL_SYSDIV_2 | SYSCTL_USE_PLL | SYSCTL_XTAL_16MHZ | SYSCTL_OSC_MAIN); */
+
+    hz = SysCtlClockGet();
+
+    /*
+     * Halt here if we don't get the desired clock frequency after setting up
+     * our clocking.
+     */
+    while (hz != CLOCK_HZ) {};
 }
 
 /*

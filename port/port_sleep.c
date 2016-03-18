@@ -7,6 +7,8 @@
 void
 sleep_port(void)
 {
-    ;
+    /* TODO: Fine-tune the peripheral enable/disable while in sleep mode */
+    SysCtlSleep();
 }
+
 #endif

@@ -22,6 +22,7 @@ main(void)
             led_tick += (500 / TICK_PERIOD_MS);
         }
 
+        /* Demo the sleep function */
         sleep();
     }
 

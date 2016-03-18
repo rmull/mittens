@@ -6,5 +6,5 @@
 void
 sleep(void)
 {
-
+    sleep_port();
 }

@@ -6,8 +6,11 @@
 //#define API_HARMONY   // Microchip Harmony library
 //#define API_TI_MSP430 // TI MSP430 direct register access
 
+/* Main oscillator frequency */
+#define CLOCK_HZ        80000000
+
 /* System tick period (tick.c/h) */
-#define TICK_PERIOD_MS  10
+#define TICK_PERIOD_MS  100
 
 /* GPIO names (gpio.c/h) */
 enum gpio_id {
