@@ -6,6 +6,6 @@
 #include "config.h"
 
 void clock_port_init(void);
-uint32_t clock_port_ticks_per_ms(void);
+uint32_t clock_port_get_freq(void);
 
 #endif

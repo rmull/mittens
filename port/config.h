@@ -20,4 +20,19 @@ enum gpio_id {
     GPIO_ID_TOTAL
 };
 
+/* Period of the post-scaled clock tick desired for the high-resolution timer */
+#define TIMER_HIRES_PERIOD      10000000        /* 100ns */
+
+/* High-resolution timer names (timer.c/h) */
+enum timer_hires_id {
+    TIMER_HIRES_ID_LED_R,
+    TIMER_HIRES_ID_TOTAL
+};
+
+/* Low-resolution timer names (timer.c/h) */
+enum timer_lores_id {
+    TIMER_LORES_ID_LED_G,
+    TIMER_LORES_ID_TOTAL
+};
+
 #endif
