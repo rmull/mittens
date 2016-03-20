@@ -39,7 +39,7 @@ timer_led_g_cb(void *ctx)
             gpio_toggle(GPIO_ID_LED_G);
         }
 
-        timer_hires_set(TIMER_HIRES_ID_LED_G, 50000, timer_led_g_cb, (void *)version_string);
+        timer_hires_set(TIMER_HIRES_ID_LED_G, 25000, timer_led_g_cb, (void *)version_string);
     }
 }
 
@@ -53,18 +53,18 @@ main(void)
 
     /* Demo the high-resolution tickless timer */
     timer_hires_set(TIMER_HIRES_ID_LED_R, 50000, timer_led_r_cb, (void *)version_string);
-    timer_hires_set(TIMER_HIRES_ID_LED_G, 50000, timer_led_g_cb, (void *)version_string);
+    timer_hires_set(TIMER_HIRES_ID_LED_G, 25000, timer_led_g_cb, (void *)version_string);
 
     while (1) {
 
         /* Demo the system tick */
         if (tick_is_expired(led_tick)) {
-            //gpio_toggle(GPIO_ID_LED_B);
-            led_tick += (500 / TICK_PERIOD_MS);
+            gpio_toggle(GPIO_ID_LED_B);
+            led_tick += (1000 / TICK_PERIOD_MS);
         }
 
         /* Demo the sleep function */
-//        sleep();
+        sleep();
     }
 
     return 0;
