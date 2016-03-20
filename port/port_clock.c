@@ -29,6 +29,6 @@ clock_port_init(void)
 uint32_t
 clock_port_get_freq(void)
 {
-    return SysCtlClockGet();;
+    return SysCtlClockGet();
 }
 #endif

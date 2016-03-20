@@ -11,6 +11,7 @@ const char version_string[] = "PRIMORDIAL MITTENS";
 uint16_t led_tick;
 
 void timer_led_r_cb(void *ctx);
+void timer_led_g_cb(void *ctx);
 
 uint16_t count = 0;
 void
@@ -19,11 +20,26 @@ timer_led_r_cb(void *ctx)
     if (ctx != NULL) {
         count++;
         if (count == 100) {
-            gpio_toggle(GPIO_ID_LED_R);
             count = 0;
+            gpio_toggle(GPIO_ID_LED_R);
         }
 
         timer_hires_set(TIMER_HIRES_ID_LED_R, 50000, timer_led_r_cb, (void *)version_string);
+    }
+}
+
+uint16_t count_g = 0;
+void
+timer_led_g_cb(void *ctx)
+{
+    if (ctx != NULL) {
+        count_g++;
+        if (count_g == 100) {
+            count_g = 0;
+            gpio_toggle(GPIO_ID_LED_G);
+        }
+
+        timer_hires_set(TIMER_HIRES_ID_LED_G, 50000, timer_led_g_cb, (void *)version_string);
     }
 }
 
@@ -37,6 +53,7 @@ main(void)
 
     /* Demo the high-resolution tickless timer */
     timer_hires_set(TIMER_HIRES_ID_LED_R, 50000, timer_led_r_cb, (void *)version_string);
+    timer_hires_set(TIMER_HIRES_ID_LED_G, 50000, timer_led_g_cb, (void *)version_string);
 
     while (1) {
 

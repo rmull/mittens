@@ -18,73 +18,64 @@
 
 #include "timer.h"
 
+#include "gpio.h"
+
 /* Global variables */
 struct timer_module timer;
 
 /* Function prototypes */
-struct timer_descriptor * timer_hires_find_next(void);
+void timer_hires_execute(struct timer_descriptor *t);
+void timer_hires_find_next(void);
+void timer_hires_adjust(void);
 void timer_hires_int(void);
 
-/*
- * TODO: What happens when curr_tick = lowest_delta?
- *
- * This works for a count-down timer - the delta calculation will need to invert
- * for a count-up timer.
- */
-struct timer_descriptor *
+void
+timer_hires_execute(struct timer_descriptor *t)
+{
+    void (*cb)(void *ctx) = t->cb;
+    void *ctx = t->ctx;
+
+    t->cb = NULL;
+    t->ctx = NULL;
+    t->deadline = 0;
+
+    if (cb != NULL) {
+        cb(ctx);
+    }
+}
+
+void
 timer_hires_find_next(void)
 {
     uint8_t i;
-    struct timer_descriptor *next = NULL;
-    uint16_t lowest_delta = 0xFFFF;
-    uint16_t delta;
-    uint16_t curr_tick = timer_port_hires_get_tick();
+    struct timer_descriptor *t_next = NULL;
 
     for (i=0; i<TIMER_HIRES_ID_TOTAL; i++) {
         if (timer.hires[i].cb != NULL) {
-            delta = (uint16_t)(curr_tick - timer.hires[i].deadline);
-
-            if (delta < lowest_delta) {
-                lowest_delta = delta;
-                next = &timer.hires[i];
+            if (t_next == NULL || timer.hires[i].deadline < t_next->deadline) {
+                t_next = &timer.hires[i];
             }
         }
     }
 
-    return next;
+    if (t_next != NULL) {
+        timer.hires_next = t_next;
+        timer_port_hires_set_load(timer.hires_next->deadline);
+        timer_port_hires_start();
+    }
 }
 
-/* Interrupt handler for timer match interrupt */
+/* Interrupt handler for timeout interrupt */
 void
 timer_hires_int(void)
 {
     timer_port_hires_int_clear();
 
     if (timer.hires_next != NULL) {
-        if (timer.hires_next->cb != NULL) {
-
-            /*
-             * Copy callback and context to temporary variable so that they can
-             * reschedule themselves without getting immediately wiped out.
-             */
-            void (*cb)(void *ctx) = timer.hires_next->cb;
-            void *ctx = timer.hires_next->ctx;
-
-            timer.hires_next->cb = NULL;
-
-            cb(ctx);
-        }
-
-        timer.hires_next = NULL;
+        timer_hires_execute(timer.hires_next);
     }
 
-    timer.hires_next = timer_hires_find_next();
-
-    if (timer.hires_next == NULL) {
-        timer_port_hires_stop();
-    } else {
-        timer_port_hires_target(timer.hires_next->deadline);
-    }
+    timer_hires_find_next();
 }
 
 void
@@ -95,7 +86,26 @@ timer_init(void)
     timer_port_hires_init();
     timer_port_hires_callback_set(timer_hires_int);
 
-    /* Don't automatically start - wait for a task to be scheduled */
+    /* Don't automatically start - wait for a task to be scheduled first */
+}
+
+void
+timer_hires_adjust(void)
+{
+    uint16_t delta;
+    uint8_t i;
+
+    delta = timer_port_hires_get_load() - timer_port_hires_get_tick();
+
+    for (i=0; i<TIMER_HIRES_ID_TOTAL; i++) {
+        if (timer.hires[i].cb != NULL) {
+            if (timer.hires[i].deadline > delta) {
+                timer.hires[i].deadline -= delta;
+            } else {
+                timer_hires_execute(&timer.hires[i]);
+            }
+        }
+    }
 }
 
 void
@@ -103,10 +113,11 @@ timer_hires_set(enum timer_hires_id t, uint16_t deadline, void (*cb)(void *ctx),
 {
     timer_port_hires_stop();
 
-    timer.hires[t].deadline = timer_port_hires_get_tick() - deadline;
+    timer.hires[t].deadline = deadline;
     timer.hires[t].cb = cb;
     timer.hires[t].ctx = ctx;
 
+    timer_hires_adjust();
+
     timer_hires_find_next();
-    timer_port_hires_start();
 }

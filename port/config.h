@@ -26,6 +26,7 @@ enum gpio_id {
 /* High-resolution timer names (timer.c/h) */
 enum timer_hires_id {
     TIMER_HIRES_ID_LED_R,
+    TIMER_HIRES_ID_LED_G,
     TIMER_HIRES_ID_TOTAL
 };
 
