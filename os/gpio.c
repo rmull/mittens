@@ -7,23 +7,23 @@
 #include "gpio.h"
 
 void
-gpio_set(enum gpio_id gpio, uint8_t level)
+gpio_set(enum gpio_id id, uint8_t level)
 {
     if (level > 1) {
         level = 1;
     }
 
-    port_gpio_set(gpio, level);
+    port_gpio_set(id, level);
 }
 
 void
-gpio_toggle(enum gpio_id gpio)
+gpio_toggle(enum gpio_id id)
 {
-    port_gpio_toggle(gpio);
+    port_gpio_toggle(id);
 }
 
 void
-gpio_init(void)
+gpio_init(enum gpio_id id)
 {
-    port_gpio_init();
+    port_gpio_init(id);
 }

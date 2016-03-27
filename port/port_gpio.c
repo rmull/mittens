@@ -1,40 +1,32 @@
 #include "port_gpio.h"
 
 #ifdef API_TIVAWARE
-#include "inc/tm4c123gh6pm.h"
+#include <stdbool.h>
+#include "driverlib/gpio.h"
+#include "driverlib/sysctl.h"
+#include "inc/hw_memmap.h"
 
 /*
  * TODO: Use per-pin initialization so that various higher-level modules can
  * take care of initializing their own GPIOs
  */
 void
-port_gpio_init(void)
+port_gpio_init(enum gpio_id id)
 {
-    /* Enable GPIO port F */
-    SYSCTL_RCGC2_R = SYSCTL_RCGC2_GPIOF;
-
-    /* Set the RGB LED pins to digital outputs */
-    GPIO_PORTF_DIR_R = 0x0e;
-    GPIO_PORTF_DEN_R = 0x0e;
-}
-
-void
-port_gpio_set(enum gpio_id gpio, uint8_t level)
-{
-    switch (gpio) {
+    switch (id) {
     case GPIO_ID_LED_R:
-        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 1));
-        GPIO_PORTF_DATA_R |= (uint32_t)(level << 1);
-        break;
-
-    case GPIO_ID_LED_B:
-        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 2));
-        GPIO_PORTF_DATA_R |= (uint32_t)(level << 2);
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+        GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1);
         break;
 
     case GPIO_ID_LED_G:
-        GPIO_PORTF_DATA_R &= (uint32_t)(~(1 << 3));
-        GPIO_PORTF_DATA_R |= (uint32_t)(level << 3);
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+        GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_2);
+        break;
+
+    case GPIO_ID_LED_B:
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+        GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3);
         break;
 
     default:
@@ -43,19 +35,48 @@ port_gpio_set(enum gpio_id gpio, uint8_t level)
 }
 
 void
-port_gpio_toggle(enum gpio_id gpio)
+port_gpio_set(enum gpio_id id, uint8_t level)
 {
-    switch (gpio) {
+    switch (id) {
     case GPIO_ID_LED_R:
-        GPIO_PORTF_DATA_R ^= (1 << 1);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, level);
         break;
 
     case GPIO_ID_LED_B:
-        GPIO_PORTF_DATA_R ^= (1 << 2);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, level);
         break;
 
     case GPIO_ID_LED_G:
-        GPIO_PORTF_DATA_R ^= (1 << 3);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, level);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void
+port_gpio_toggle(enum gpio_id id)
+{
+    uint32_t level;
+
+    switch (id) {
+    case GPIO_ID_LED_R:
+        level = GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_1);
+        level ^= GPIO_PIN_1;
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, level);
+        break;
+
+    case GPIO_ID_LED_B:
+        level = GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_2);
+        level ^= GPIO_PIN_2;
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, level);
+        break;
+
+    case GPIO_ID_LED_G:
+        level = GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_3);
+        level ^= GPIO_PIN_3;
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, level ^ 1);
         break;
 
     default:

@@ -28,14 +28,13 @@ enum gpio_id {
 
 /* High-resolution timer names (timer.c/h) */
 enum timer_hires_id {
-    TIMER_HIRES_ID_LED_R,
     TIMER_HIRES_ID_LED_G,
+    TIMER_HIRES_ID_LED_B,
     TIMER_HIRES_ID_TOTAL
 };
 
 /* Low-resolution timer names (timer.c/h) */
 enum timer_lores_id {
-    TIMER_LORES_ID_LED_G,
     TIMER_LORES_ID_TOTAL
 };
 
