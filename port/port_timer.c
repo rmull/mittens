@@ -1,7 +1,7 @@
 #include "port_timer.h"
 
 #ifdef API_TIVAWARE
-#include <stdbool.h>    // Required for timer.h
+#include <stdbool.h>
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
 #include "inc/hw_memmap.h"

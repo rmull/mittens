@@ -3,6 +3,10 @@
 #ifdef API_TIVAWARE
 #include "inc/tm4c123gh6pm.h"
 
+/*
+ * TODO: Use per-pin initialization so that various higher-level modules can
+ * take care of initializing their own GPIOs
+ */
 void
 port_gpio_init(void)
 {

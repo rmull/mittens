@@ -6,6 +6,8 @@
 #include "os/sleep.h"
 #include "os/timer.h"
 
+#include "driver/max31855.h"
+
 const char version_string[] = "PRIMORDIAL MITTENS";
 
 uint16_t led_tick;
@@ -50,6 +52,7 @@ main(void)
     tick_init();
     gpio_init();
     timer_init();
+    max31855_init(MAX31855_ID_0);
 
     /* Demo the high-resolution tickless timer */
     timer_hires_set(TIMER_HIRES_ID_LED_R, 50000, timer_led_r_cb, (void *)version_string);
@@ -62,6 +65,9 @@ main(void)
             gpio_toggle(GPIO_ID_LED_B);
             led_tick += (1000 / TICK_PERIOD_MS);
         }
+
+        /* MAX31855 thermocouple reader */
+        max31855_task();
 
         /* Demo the sleep function */
         sleep();
