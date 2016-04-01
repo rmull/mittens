@@ -37,7 +37,7 @@ tick_start(void)
  * Initialize a periodic system tick timer peripheral and automatically start
  * it.
  *
- * Specify period in milliseconds.
+ * Period is defined by TICK_PERIOD_MS at build-time.
  */
 void
 tick_init(void)

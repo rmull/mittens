@@ -3,39 +3,25 @@
 #include "os/spi.h"
 #include "os/tick.h"
 
-struct max31855_descriptor max31855[MAX31855_ID_TOTAL];
-
 void
-max31855_init(enum max31855_id id)
+max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs)
 {
-    /* TODO: I don't care for this... */
-    switch (id) {
-    case 0:
-        max31855[id].spi.cs = GPIO_ID_SPI_MAX31855_CS;
-        break;
+    max31855->spi.bus_id = SPI_ID_MAX31855;
+    max31855->spi.cs = cs;
+    max31855->spi.bitrate = 5000;       /* MAX31855 max SCLK is 5MHz */ /* TODO: Set low for testing */
+    max31855->spi.mode = 1;             /* CPOL = 0, CPHA = 1 *//* TODO: Confirm */
+    max31855->alarm = 0;
+    max31855->poll_period_ms = 500;
 
-    default:
-        break;
-    }
-
-    max31855[id].spi.bitrate = 5000000;     /* MAX31855 max SCLK is 5MHz */
-    max31855[id].spi.mode = 1;              /* CPOL = 0, CPHA = 1 */ /* TODO: Confirm */
-    max31855[id].alarm = 0;
-    max31855[id].poll_period_ms = 500;
-
-    spi_init(&(max31855[id].spi), SPI_ID_MAX31855);
+    spi_init (&(max31855->spi));
 }
 
 void
-max31855_task(void)
+max31855_task(struct max31855_descriptor *max31855)
 {
-    uint8_t i;
+    if (tick_is_expired(max31855->alarm)) {
+        spi_read(&(max31855->spi), max31855->buf, MAX31855_BUF_SZ);
 
-    for (i=0; i<MAX31855_ID_TOTAL; i++) {
-        if (tick_is_expired(max31855[i].alarm)) {
-            spi_read(&(max31855[i].spi), max31855[i].buf, MAX31855_BUF_SZ);
-
-            max31855[i].alarm += (max31855[i].poll_period_ms / TICK_PERIOD_MS);
-        }
+        max31855->alarm += (max31855->poll_period_ms / TICK_PERIOD_MS);
     }
 }

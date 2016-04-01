@@ -39,6 +39,7 @@ enum timer_lores_id {
 };
 
 /***************** port_spi.c/h ******************/
+/* Name your SPI buses */
 enum spi_id {
     SPI_ID_MAX31855,
     SPI_ID_TOTAL
