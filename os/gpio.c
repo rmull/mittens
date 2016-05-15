@@ -1,7 +1,15 @@
 /*
  * gpio.c
  *
- * Provides handling for basic GPIO operations
+ * Provides handling of basic GPIO operations.
+ *
+ * Porting:
+ * - Enumerate your GPIOs in port/config.h
+ * - Expand the switch statements in port/gpio.c
+ *
+ * TODO:
+ * - A full port might enumerate all GPIOs in the system by their pin number,
+ *   and then #define the application pin name to the pin number on the MCU.
  *
  */
 #include "gpio.h"

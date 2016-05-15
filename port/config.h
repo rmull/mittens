@@ -18,24 +18,18 @@ enum gpio_id {
     GPIO_ID_LED_R,
     GPIO_ID_LED_G,
     GPIO_ID_LED_B,
-    GPIO_ID_SPI_MAX31855_CS,
     GPIO_ID_TOTAL
 };
 
-/***************** port_timer.c/h ******************/
-/* Period of the post-scaled clock tick desired for the high-resolution timer */
-#define TIMER_HIRES_PERIOD      10000000        /* 100ns */
+/***************** port_timer.c/h **************/
+/* Period of the post-scaled clock for the tickless timer */
+#define TIMER_RESOLUTION     10000000        /* (1/TIMER_RESOLUTION) = 100ns */
 
-/* High-resolution timer names (timer.c/h) */
-enum timer_hires_id {
-    TIMER_HIRES_ID_LED_G,
-    TIMER_HIRES_ID_LED_B,
-    TIMER_HIRES_ID_TOTAL
-};
-
-/* Low-resolution timer names (timer.c/h) */
-enum timer_lores_id {
-    TIMER_LORES_ID_TOTAL
+/* Tickless timer names (timer.c/h) */
+enum timer_id {
+    TIMER_ID_LED_G,
+    TIMER_ID_LED_B,
+    TIMER_ID_TOTAL
 };
 
 /***************** port_spi.c/h ******************/

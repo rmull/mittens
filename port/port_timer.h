@@ -5,13 +5,13 @@
 
 #include "config.h"
 
-void timer_port_hires_init();
-void timer_port_hires_start();
-void timer_port_hires_stop();
-uint16_t timer_port_hires_get_tick();
-void timer_port_hires_callback_set(void (*cb)(void));
-void timer_port_hires_set_load(uint16_t target);
-uint16_t timer_port_hires_get_load(void);
-void timer_port_hires_int_clear(void);
+void timer_port_init();
+void timer_port_start();
+void timer_port_stop();
+uint16_t timer_port_get_tick();
+void timer_port_callback_set(void (*cb)(void));
+void timer_port_set_load(uint16_t target);
+uint16_t timer_port_get_load(void);
+void timer_port_int_clear(void);
 
 #endif

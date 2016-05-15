@@ -91,7 +91,7 @@ serial_pop(struct serial_descriptor *sb)
         pop = sb->buf++;
         sb->sz--;
 
-        if (sb->sz == 0) {
+        if (sb->sz == 0 && sb->cb != NULL) {
             sb->cb(sb->ctx);
         }
     } else {

@@ -7,9 +7,9 @@ main(void)
 
     while (1) {
 
-        app_demo_tick_task();
-        //app_demo_max31855_task();
+        //app_demo_tick_task();
+        app_demo_max31855_task();
 
-        app_demo_sleep_task();
+        //app_demo_sleep_task();
     }
 }

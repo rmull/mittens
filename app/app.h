@@ -11,7 +11,7 @@ struct app_descriptor {
 };
 
 void app_init(void);
-void app_demo_timer_hires(void);
+void app_demo_timer(void);
 void app_demo_tick_task(void);
 void app_demo_max31855_task(void);
 void app_demo_sleep_task(void);

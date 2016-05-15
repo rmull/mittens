@@ -17,7 +17,7 @@ void
 spi_int_0(void)
 {
     uint8_t *buf;
-    uint8_t data;
+    volatile uint8_t data;
 
     struct spi_descriptor *spi = (struct spi_descriptor *)int_ctx[0];
 
@@ -41,7 +41,6 @@ void
 spi_init(struct spi_descriptor *sd)
 {
     spi_port_init(sd->bus_id, sd->bitrate, sd->mode);
-
 
     int_ctx[sd->bus_id] = (void *)sd;
 

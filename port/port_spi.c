@@ -86,7 +86,6 @@ spi_port_int_clear(enum spi_id id)
     case 0:
         SSIIntClear(SSI0_BASE, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
         break;
-
     default:
         break;
     }
@@ -122,7 +121,14 @@ spi_port_read(enum spi_id id)
 {
     uint32_t data;
 
-    SSIDataGetNonBlocking(SSI0_BASE, &data);
+    switch (id) {
+    case 0:
+        SSIDataGetNonBlocking(SSI0_BASE, &data);
+        break;
+    default:
+        data = 0;
+        break;
+    }
 
     return data;
 }

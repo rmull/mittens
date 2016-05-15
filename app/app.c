@@ -29,22 +29,22 @@ timer_cb(void *ctx)
             if (*timer == 0) {
                 gpio_toggle(GPIO_ID_LED_B);
             }
-            timer_hires_set(TIMER_HIRES_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
+            timer_set(TIMER_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
         } else if (timer == &(app.timer_g)) {
             if (*timer == 0) {
                 gpio_toggle(GPIO_ID_LED_G);
             }
-            timer_hires_set(TIMER_HIRES_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
+            timer_set(TIMER_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
         }
     }
 }
 
 /* Call once, don't poll */
 void
-app_demo_timer_hires(void)
+app_demo_timer(void)
 {
-    timer_hires_set(TIMER_HIRES_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
-    timer_hires_set(TIMER_HIRES_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
+    timer_set(TIMER_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
+    timer_set(TIMER_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
 }
 
 void
@@ -78,9 +78,9 @@ app_init(void)
         gpio_set(i, 1);
     }
 
-    max31855_init(&(app.max31855), GPIO_ID_SPI_MAX31855_CS);
+    max31855_init(&(app.max31855), 0xFF); /* Not using GPIO CS, so use invalid ID here */
 
-    app_demo_timer_hires();
+    //app_demo_timer();
 }
 
 void
