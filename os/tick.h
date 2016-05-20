@@ -5,9 +5,12 @@
 
 #include "port/port_tick.h"
 
+#define TICK_DISABLED   0xFFFF
+
 void tick_init(void);
 void tick_start(void);
-uint8_t tick_is_expired(uint16_t alarm);
+uint16_t tick_from_ms(uint16_t ms);
+uint8_t tick_is_expired(uint16_t *alarm);
 
 /*
  * Usage Example:
@@ -22,7 +25,7 @@ uint8_t tick_is_expired(uint16_t alarm);
  *     if (tick_is_expired(alarm)) {
  *
  *         // Reschedule for 50ms in the future after every expiration
- *         alarm += (50 / TICK_PERIOD_MS);
+ *         alarm = tick_from_ms(50);;
  *     }
  * }
  */

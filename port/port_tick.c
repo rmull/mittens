@@ -5,12 +5,12 @@
 #include "driverlib/systick.h"
 
 /*
- * Specify period in milliseconds
+ * Specify period in Hz
  */
 void
-tick_port_period_set(uint32_t ms)
+tick_port_period_set(uint32_t hz)
 {
-    SysTickPeriodSet((clock_port_get_freq() / 1000) * ms);
+    SysTickPeriodSet(clock_port_get_freq() / hz);
 }
 
 void

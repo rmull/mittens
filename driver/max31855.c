@@ -29,9 +29,9 @@ max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs)
 void
 max31855_task(struct max31855_descriptor *max31855)
 {
-    if (tick_is_expired(max31855->alarm)) {
+    if (tick_is_expired(&(max31855->alarm))) {
         spi_read(&(max31855->spi), max31855->buf, MAX31855_BUF_SZ);
 
-        max31855->alarm += (max31855->poll_period_ms / TICK_PERIOD_MS);
+        max31855->alarm = tick_from_ms(500);    /* TODO */
     }
 }

@@ -50,9 +50,9 @@ app_demo_timer(void)
 void
 app_demo_tick_task(void)
 {
-    if (tick_is_expired(app.tick_r)) {
+    if (tick_is_expired(&(app.tick_r))) {
         gpio_toggle(GPIO_ID_LED_R);
-        app.tick_r += (1000 / TICK_PERIOD_MS);
+        app.tick_r = tick_from_ms(500);
     }
 }
 
@@ -78,7 +78,9 @@ app_init(void)
         gpio_set(i, 1);
     }
 
-    max31855_init(&(app.max31855), 0xFF); /* Not using GPIO CS, so use invalid ID here */
+    app.tick_r = tick_from_ms(0);
+
+    //max31855_init(&(app.max31855), 0xFF); /* Not using GPIO CS, so use invalid ID here */
 
     //app_demo_timer();
 }

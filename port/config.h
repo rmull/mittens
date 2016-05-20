@@ -11,7 +11,7 @@
 #define CLOCK_HZ        80000000
 
 /***************** port_tick.c/h ******************/
-#define TICK_PERIOD_MS  100
+#define TICK_HZ         200
 
 /***************** port_gpio.c/h ******************/
 enum gpio_id {
