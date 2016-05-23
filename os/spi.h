@@ -5,22 +5,21 @@
 #include "serial.h"
 #include "gpio.h"
 
-enum spi_state {
-    SPI_IDLE,
-    SPI_BUSY,
-    SPI_DONE
-};
-
 struct spi_descriptor {
-    struct serial_descriptor serial;
+    struct serial_descriptor *tx;
+    struct serial_descriptor *rx;
     uint32_t bitrate;
     enum gpio_id cs;
     uint8_t bus_id;
     uint8_t mode;
-    enum spi_state state;
 };
 
+/* Return values */
+#define SPI_OK          0
+#define SPI_BUSY        -1
+
 void spi_init(struct spi_descriptor *sd);
-void spi_read(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz);
+int spi_read(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz,
+                                              void (*cb)(void *ctx), void *ctx);
 
 #endif

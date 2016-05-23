@@ -5,6 +5,8 @@
 
 #include "port/port_gpio.h"
 
+#define GPIO_NONE       0xFF
+
 void gpio_init(enum gpio_id id);
 void gpio_set(enum gpio_id id, uint8_t level);
 void gpio_toggle(enum gpio_id id);

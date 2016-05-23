@@ -11,10 +11,10 @@
 struct app_descriptor app;
 const char version_string[] = "PRIMORDIAL MITTENS";
 
-void timer_cb(void *ctx);
+void app_demo_timer_cb(void *ctx);
 
 void
-timer_cb(void *ctx)
+app_demo_timer_cb(void *ctx)
 {
     uint16_t *timer;
 
@@ -29,12 +29,12 @@ timer_cb(void *ctx)
             if (*timer == 0) {
                 gpio_toggle(GPIO_ID_LED_B);
             }
-            timer_set(TIMER_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
+            timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
         } else if (timer == &(app.timer_g)) {
             if (*timer == 0) {
                 gpio_toggle(GPIO_ID_LED_G);
             }
-            timer_set(TIMER_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
+            timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
         }
     }
 }
@@ -43,23 +43,8 @@ timer_cb(void *ctx)
 void
 app_demo_timer(void)
 {
-    timer_set(TIMER_ID_LED_B, 50000, timer_cb, (void *)&(app.timer_b));
-    timer_set(TIMER_ID_LED_G, 25000, timer_cb, (void *)&(app.timer_g));
-}
-
-void
-app_demo_tick_task(void)
-{
-    if (tick_is_expired(&(app.tick_r))) {
-        gpio_toggle(GPIO_ID_LED_R);
-        app.tick_r = tick_from_ms(500);
-    }
-}
-
-void
-app_demo_max31855_task(void)
-{
-    max31855_task(&(app.max31855));
+    timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
+    timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
 }
 
 void
@@ -78,11 +63,19 @@ app_init(void)
         gpio_set(i, 1);
     }
 
-    app.tick_r = tick_from_ms(0);
+    max31855_init(&(app.max31855), GPIO_NONE);
+}
 
-    //max31855_init(&(app.max31855), 0xFF); /* Not using GPIO CS, so use invalid ID here */
+void
+app_demo(void)
+{
+    if (tick_is_expired(&app.tick)) {
+        app.tick = tick_from_ms(500);
 
-    //app_demo_timer();
+        gpio_toggle(GPIO_ID_LED_R);
+
+        max31855_read(&app.max31855);
+    }
 }
 
 void

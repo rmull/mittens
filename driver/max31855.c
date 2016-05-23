@@ -1,37 +1,69 @@
 #include "max31855.h"
 
 #include "os/spi.h"
-#include "os/tick.h"
 
-/*
- * TODO:
- *
- * The serial buffer system will run a callback after it's done dumping its
- * dummy read bytes into the TX FIFO. This callback will probably run before the
- * data is done being RXed, since the FIFO is multiple bytes deep.
- *
- * Need to read more about how the SPI interrupt is handled on the TI part.
- */
+void max31855_spi_cb(void *ctx);
+int16_t max31855_get_degc(struct max31855_descriptor *max31855);
+uint8_t max31855_get_fault(struct max31855_descriptor *max31855);
 
 void
 max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs)
 {
     max31855->spi.bus_id = SPI_ID_MAX31855;
     max31855->spi.cs = cs;
-    max31855->spi.bitrate = 500;       /* MAX31855 max SCLK is 5MHz */ /* TODO: Set low for testing */
-    max31855->spi.mode = 1;             /* CPOL = 0, CPHA = 1 *//* TODO: Confirm */
-    max31855->alarm = 0;
+    max31855->spi.bitrate = 100000;    /* MAX31855 max SCLK is 5MHz */
+    max31855->spi.mode = 1;             /* CPOL = 0, CPHA = 1 */
+    max31855->spi.rx = &(max31855->spi_rx);
     max31855->poll_period_ms = 500;
 
     spi_init(&(max31855->spi));
 }
 
-void
-max31855_task(struct max31855_descriptor *max31855)
+/*
+ * Returns a signed integer in units of 0.25 degrees Celsius. Note that calling
+ * this on a buffer that is not done being written will result in erroneous
+ * data.
+ */
+int16_t
+max31855_get_degc(struct max31855_descriptor *max31855)
 {
-    if (tick_is_expired(&(max31855->alarm))) {
-        spi_read(&(max31855->spi), max31855->buf, MAX31855_BUF_SZ);
+    uint16_t raw;
 
-        max31855->alarm = tick_from_ms(500);    /* TODO */
+    raw = ((uint16_t)(max31855->buf[0]) << 8) | max31855->buf[1];
+
+    raw >>= 2;
+
+    if (raw & 0x2000) {
+        raw |= 0xE000;
     }
+
+    return (int16_t)raw;
+}
+
+uint8_t
+max31855_get_fault(struct max31855_descriptor *max31855)
+{
+    return max31855->buf[3] &
+                    (MAX31855_FAULT_OC|MAX31855_FAULT_SCG|MAX31855_FAULT_SCV);
+}
+
+void
+max31855_spi_cb(void *ctx)
+{
+    struct max31855_descriptor *max31855 = (struct max31855_descriptor *)ctx;
+
+    if (max31855_get_fault(max31855) == MAX31855_FAULT_NONE) {
+        max31855->degc = max31855_get_degc(max31855);
+    }
+}
+
+int
+max31855_read(struct max31855_descriptor *max31855)
+{
+    if (spi_read(&(max31855->spi), max31855->buf, MAX31855_BUF_SZ,
+                                         max31855_spi_cb, max31855) == SPI_OK) {
+        return MAX31855_OK;
+    }
+
+    return MAX31855_BUSY;
 }

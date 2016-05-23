@@ -2,23 +2,27 @@
 #define MAX31855_H_
 
 #include "os/spi.h"
-
-/* Enumerate each MAX31855 in the system */
-enum max31855_id {
-    MAX31855_ID_0,
-    MAX31855_ID_TOTAL
-};
+#include "os/serial.h"
 
 #define MAX31855_BUF_SZ         4
 
+#define MAX31855_FAULT_NONE     0
+#define MAX31855_FAULT_OC       (1<<0)
+#define MAX31855_FAULT_SCG      (1<<1)
+#define MAX31855_FAULT_SCV      (1<<2)
+
 struct max31855_descriptor {
     struct spi_descriptor spi;
-    uint16_t alarm;
+    struct serial_descriptor spi_rx;
+    int16_t degc;
     uint16_t poll_period_ms;
     uint8_t buf[MAX31855_BUF_SZ];
 };
 
+#define MAX31855_OK             0
+#define MAX31855_BUSY           -1
+
 void max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs);
-void max31855_task(struct max31855_descriptor *max31855);
+int max31855_read(struct max31855_descriptor *max31855);
 
 #endif

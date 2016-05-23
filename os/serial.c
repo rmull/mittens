@@ -13,10 +13,10 @@ void serial_unlock(struct serial_descriptor *sb);
 void
 serial_init(struct serial_descriptor *sb)
 {
+    sb->cb = NULL;
     sb->buf = NULL;
     sb->sz = 0;
     sb->ctx = NULL;
-    sb->cb = NULL;
     sb->flags = 0;
 }
 
@@ -25,10 +25,10 @@ serial_lock(struct serial_descriptor *sb)
 {
     if (sb->flags & FLAG_LOCK) {
         return SERIAL_BUSY;
-    } else {
-        sb->flags |= FLAG_LOCK;
-        return SERIAL_OK;
     }
+
+    sb->flags |= FLAG_LOCK;
+    return SERIAL_OK;
 }
 
 void
@@ -42,8 +42,8 @@ serial_set_cb(struct serial_descriptor *sb, void (*cb)(void *ctx), void *ctx)
 {
     while (serial_lock(sb) == SERIAL_BUSY);
 
-    sb->cb = cb;
     sb->ctx = ctx;
+    sb->cb = cb;
 
     serial_unlock(sb);
 }
@@ -91,8 +91,12 @@ serial_pop(struct serial_descriptor *sb)
         pop = sb->buf++;
         sb->sz--;
 
-        if (sb->sz == 0 && sb->cb != NULL) {
-            sb->cb(sb->ctx);
+        if (sb->sz == 0) {
+            sb->flags &= ~SERIAL_BUSY;
+
+            if (sb->cb != NULL) {
+                sb->cb(sb->ctx);
+            }
         }
     } else {
         pop = NULL;
@@ -116,11 +120,23 @@ serial_push(struct serial_descriptor *sb, uint8_t push)
         *(sb->buf) = push;
         sb->buf++;
         sb->sz--;
+
+        if (sb->sz == 0) {
+            sb->flags &= ~SERIAL_BUSY;
+
+            if (sb->cb != NULL) {
+                sb->cb(sb->ctx);
+            }
+
+            return NULL;
+        }
     }
 
-    if (sb->sz == 0) {
-        return NULL;
-    } else {
-        return sb->buf;
-    }
+    return sb->buf;
+}
+
+uint16_t
+serial_get_sz(struct serial_descriptor *sb)
+{
+    return sb->sz;
 }

@@ -5,48 +5,66 @@
 
 /*
  * TODO: Support SPI port sharing
- * TODO: Support SPI reads
+ * TODO: Support TX and TX/RX half-duplex chains
+ * TODO: Support full-duplex swaps
  */
 
 void *int_ctx[SPI_ID_TOTAL];
 
+void spi_tasks(struct spi_descriptor *spi);
 void spi_int_0(void);
-void test_spi_cb(void *ctx);
+
+/*
+ * TODO: Could eventually use this as part of a interrupt-free polled setup
+ */
+void
+spi_tasks(struct spi_descriptor *spi)
+{
+    uint8_t *buf = NULL;
+    uint8_t data;
+
+    data = spi_port_read(spi->bus_id);
+
+    if (spi->tx != NULL && serial_get_sz(spi->tx) > 0) {
+        buf = serial_pop(spi->tx);
+        if (buf != NULL) {
+            spi_port_write(spi->bus_id, *buf);
+        }
+
+    } else if (spi->rx != NULL && serial_get_sz(spi->rx) > 0) {
+        buf = serial_push(spi->rx, data);
+        if (buf != NULL) {
+            spi_port_write(spi->bus_id, 0xFF);
+        }
+    }
+
+    if (buf == NULL) {
+        spi_port_int_disable(spi->bus_id);
+    }
+}
 
 void
 spi_int_0(void)
 {
-    uint8_t *buf;
-    volatile uint8_t data;
-
     struct spi_descriptor *spi = (struct spi_descriptor *)int_ctx[0];
 
     spi_port_int_clear(spi->bus_id);
 
     if (spi != NULL) {
-
-        data = spi_port_read(spi->bus_id);
-
-        buf = serial_pop(&(spi->serial));
-
-        if (buf != NULL) {
-            spi_port_write(spi->bus_id, *buf);
-        } else {
-            spi_port_int_disable(spi->bus_id);
-        }
+        spi_tasks(spi);
     }
 }
 
 void
-spi_init(struct spi_descriptor *sd)
+spi_init(struct spi_descriptor *spi)
 {
-    spi_port_init(sd->bus_id, sd->bitrate, sd->mode);
+    spi_port_init(spi->bus_id, spi->bitrate, spi->mode);
 
-    int_ctx[sd->bus_id] = (void *)sd;
+    int_ctx[spi->bus_id] = (void *)spi;
 
-    switch (sd->bus_id) {
+    switch (spi->bus_id) {
     case 0:
-        spi_port_callback_set(sd->bus_id, spi_int_0);
+        spi_port_callback_set(spi->bus_id, spi_int_0);
         break;
 
     default:
@@ -54,31 +72,21 @@ spi_init(struct spi_descriptor *sd)
     }
 }
 
-void
-test_spi_cb(void *ctx)
-{
-    (void *)ctx;
-}
-
 /*
  * Clocks out dummy bytes in order to make a read
  */
-void
-spi_read(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz)
+int
+spi_read(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz, void (*cb)(void *ctx), void *ctx)
 {
-    uint8_t *data;
+    if (serial_set_buf(spi->rx, buf, sz) == SERIAL_OK) {
+        serial_set_cb(spi->rx, cb, ctx);
 
-    gpio_set(spi->cs, 0);
+        gpio_set(spi->cs, 0);
 
-    memset(buf, 0xFF, sz);
+        spi_port_write(spi->bus_id, 0xFF);
 
-    if (serial_set_buf(&(spi->serial), buf, sz) == SERIAL_OK) {
-        serial_set_cb(&(spi->serial), test_spi_cb, NULL);
+        return SPI_OK;
     }
 
-    data = serial_pop(&(spi->serial));
-
-    if (data != NULL) {
-        spi_port_write(spi->bus_id, *data);
-    }
+    return SPI_BUSY;
 }

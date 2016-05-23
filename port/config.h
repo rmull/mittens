@@ -39,4 +39,10 @@ enum spi_id {
     SPI_ID_TOTAL
 };
 
+/* Enumerate each MAX31855 in the system */
+enum max31855_id {
+    MAX31855_ID_0,
+    MAX31855_ID_TOTAL
+};
+
 #endif
