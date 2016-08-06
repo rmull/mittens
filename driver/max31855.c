@@ -9,14 +9,13 @@ uint8_t max31855_get_fault(struct max31855_descriptor *max31855);
 void
 max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs)
 {
-    max31855->spi.bus_id = SPI_ID_MAX31855;
     max31855->spi.cs = cs;
     max31855->spi.bitrate = 100000;    /* MAX31855 max SCLK is 5MHz */
     max31855->spi.mode = 1;             /* CPOL = 0, CPHA = 1 */
     max31855->spi.rx = &(max31855->spi_rx);
     max31855->poll_period_ms = 500;
 
-    spi_init(&(max31855->spi));
+    spi_init(SPI_ID_MAX31855, &(max31855->spi));
 }
 
 /*

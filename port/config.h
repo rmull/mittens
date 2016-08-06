@@ -34,10 +34,11 @@ enum timer_id {
 
 /***************** port_spi.c/h ******************/
 /* Name your SPI buses */
-enum spi_id {
-    SPI_ID_MAX31855,
-    SPI_ID_TOTAL
-};
+#define SPI_ID_MAX31855         SPI_0
+
+/***************** port_uart.c/h ******************/
+/* Name your UART channels */
+#define UART_ID_DMX             UART_0
 
 /* Enumerate each MAX31855 in the system */
 enum max31855_id {
