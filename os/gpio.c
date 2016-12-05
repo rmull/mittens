@@ -4,20 +4,16 @@
  * Provides handling of basic GPIO operations.
  *
  * Porting:
- * - Enumerate your GPIOs in port/config.h
- * - Expand the switch statements in port/gpio.c
- *
- * TODO:
- * - A full port might enumerate all GPIOs in the system by their pin number,
- *   and then #define the application pin name to the pin number on the MCU.
- *
+ * 1. Enumerate the system's GPIOs in port/gpio.h
+ * 2. Map your application's GPIO needs to the underlying GPIO in app.h
+ * 3. Fill in the switch statements in port/gpio.c
  */
 #include "gpio.h"
 
 void
 gpio_set(enum gpio_id id, uint8_t level)
 {
-    if (level > 1) {
+    if (level) {
         level = 1;
     }
 
@@ -34,4 +30,10 @@ void
 gpio_init(enum gpio_id id)
 {
     port_gpio_init(id);
+}
+
+uint8_t
+gpio_get(enum gpio_id id)
+{
+    return port_gpio_get(id);
 }

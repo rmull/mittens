@@ -7,6 +7,7 @@
 #include "os/gpio.h"
 #include "os/timer.h"
 #include "os/sleep.h"
+#include "driver/triac.h"
 
 struct app_descriptor app;
 const char version_string[] = "PRIMORDIAL MITTENS";
@@ -27,12 +28,12 @@ app_demo_timer_cb(void *ctx)
 
         if (timer == &(app.timer_b)) {
             if (*timer == 0) {
-                gpio_toggle(GPIO_ID_LED_B);
+                gpio_toggle(GPIO_LED_B);
             }
             timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
         } else if (timer == &(app.timer_g)) {
             if (*timer == 0) {
-                gpio_toggle(GPIO_ID_LED_G);
+                gpio_toggle(GPIO_LED_G);
             }
             timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
         }
@@ -50,20 +51,21 @@ app_demo_timer(void)
 void
 app_init(void)
 {
-    uint8_t i;
-
     memset((void *)&app, 0x00, sizeof(app));
 
     clock_init();
     tick_init();
     timer_init();
 
-    for (i=0; i<GPIO_ID_TOTAL; i++) {
-        gpio_init(i);
-        gpio_set(i, 1);
-    }
+    gpio_init(GPIO_LED_R);
+    gpio_init(GPIO_LED_G);
+    gpio_init(GPIO_LED_B);
+    gpio_init(GPIO_TRIAC_IN);
 
     max31855_init(&(app.max31855), GPIO_NONE);
+
+    triac_init();
+    port_gpio_int_enable(GPIO_TRIAC_IN);
 }
 
 void
@@ -72,7 +74,7 @@ app_demo(void)
     if (tick_is_expired(&app.tick)) {
         app.tick = tick_from_ms(500);
 
-        gpio_toggle(GPIO_ID_LED_R);
+        gpio_toggle(GPIO_LED_R);
 
         max31855_read(&app.max31855);
     }
