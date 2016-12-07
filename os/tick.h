@@ -22,7 +22,7 @@ uint8_t tick_is_expired(uint16_t *alarm);
  * while (1) {
  *
  *     // alarm checked for expiration
- *     if (tick_is_expired(alarm)) {
+ *     if (tick_is_expired(&alarm)) {
  *
  *         // Reschedule for 50ms in the future after every expiration
  *         alarm = tick_from_ms(50);

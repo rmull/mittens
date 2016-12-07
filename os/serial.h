@@ -20,11 +20,11 @@ struct serial_descriptor {
 #define SERIAL_OK       0
 #define SERIAL_BUSY     -1
 
-void serial_init(struct serial_descriptor *sb);
-void serial_set_cb(struct serial_descriptor *sb, void (*cb)(void *ctx), void *ctx);
-int serial_set_buf(struct serial_descriptor *sb, uint8_t *buf, uint16_t sz);
-uint8_t * serial_pop(struct serial_descriptor *sb);
-uint8_t * serial_push(struct serial_descriptor *sb, uint8_t push);
-uint16_t serial_get_sz(struct serial_descriptor *sb);
+void serial_init(struct serial_descriptor *s);
+void serial_set_cb(struct serial_descriptor *s, void (*cb)(void *ctx), void *ctx);
+int serial_set_buf(struct serial_descriptor *s, uint8_t *buf, uint16_t sz);
+uint8_t * serial_pop(struct serial_descriptor *s);
+uint8_t * serial_push(struct serial_descriptor *s, uint8_t push);
+uint16_t serial_get_sz(struct serial_descriptor *s);
 
 #endif

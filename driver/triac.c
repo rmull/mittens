@@ -11,9 +11,14 @@
  * power at the output of the triac.
  *
  * A half-cycle of 60Hz AC takes 8.33ms to elapse. Therefore, if we use a
- * 16-bit timer peripheral, a 4MHz count source would be ideal because an 8MHz
- * count source will max out at 8.19ms. With a 16-bit 4MHz we get 250ns
- * precision, and our timer load register should never be greater than 33,333.
+ * 16-bit timer peripheral, to maximize our resolution and still be able to
+ * address the entire half cycle, our clock source should be:
+ *
+ * 1/60/2 = 0.008333 sec (time of a 60Hz AC half-cycle)
+ * 0.008333 / 65536 = 1.27e-7 (time for one tick if we use 16-bit resolution)
+ * 1/1.27e-7 = 7864320 (max freq of 16-bit timer that can span whole half-cycle)
+ *
+ * A 4MHz clock source should be sufficient, since 8MHz is too much.
  */
 
 /* TODO:

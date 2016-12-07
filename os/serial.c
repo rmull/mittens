@@ -7,59 +7,59 @@
  * UART, I2C, etc.
  */
 
-int serial_lock(struct serial_descriptor *sb);
-void serial_unlock(struct serial_descriptor *sb);
+int serial_lock(struct serial_descriptor *s);
+void serial_unlock(struct serial_descriptor *s);
 
 void
-serial_init(struct serial_descriptor *sb)
+serial_init(struct serial_descriptor *s)
 {
-    sb->cb = NULL;
-    sb->buf = NULL;
-    sb->sz = 0;
-    sb->ctx = NULL;
-    sb->flags = 0;
+    s->cb = NULL;
+    s->buf = NULL;
+    s->sz = 0;
+    s->ctx = NULL;
+    s->flags = 0;
 }
 
 int
-serial_lock(struct serial_descriptor *sb)
+serial_lock(struct serial_descriptor *s)
 {
-    if (sb->flags & FLAG_LOCK) {
+    if (s->flags & FLAG_LOCK) {
         return SERIAL_BUSY;
     }
 
-    sb->flags |= FLAG_LOCK;
+    s->flags |= FLAG_LOCK;
     return SERIAL_OK;
 }
 
 void
-serial_unlock(struct serial_descriptor *sb)
+serial_unlock(struct serial_descriptor *s)
 {
-    sb->flags &= ~FLAG_LOCK;
+    s->flags &= ~FLAG_LOCK;
 }
 
 void
-serial_set_cb(struct serial_descriptor *sb, void (*cb)(void *ctx), void *ctx)
+serial_set_cb(struct serial_descriptor *s, void (*cb)(void *ctx), void *ctx)
 {
-    while (serial_lock(sb) == SERIAL_BUSY);
+    while (serial_lock(s) == SERIAL_BUSY);
 
-    sb->ctx = ctx;
-    sb->cb = cb;
+    s->ctx = ctx;
+    s->cb = cb;
 
-    serial_unlock(sb);
+    serial_unlock(s);
 }
 
 int
-serial_set_buf(struct serial_descriptor *sb, uint8_t *buf, uint16_t sz)
+serial_set_buf(struct serial_descriptor *s, uint8_t *buf, uint16_t sz)
 {
     int status;
 
-    while (serial_lock(sb) == SERIAL_BUSY);
+    while (serial_lock(s) == SERIAL_BUSY);
 
-    if (!(sb->flags & FLAG_INUSE)) {
-        sb->flags |= FLAG_INUSE;
+    if (!(s->flags & FLAG_INUSE)) {
+        s->flags |= FLAG_INUSE;
 
-        sb->buf = buf;
-        sb->sz = sz;
+        s->buf = buf;
+        s->sz = sz;
 
         status = SERIAL_OK;
 
@@ -69,7 +69,7 @@ serial_set_buf(struct serial_descriptor *sb, uint8_t *buf, uint16_t sz)
         status = SERIAL_BUSY;
     }
 
-    serial_unlock(sb);
+    serial_unlock(s);
 
     return status;
 }
@@ -83,19 +83,19 @@ serial_set_buf(struct serial_descriptor *sb, uint8_t *buf, uint16_t sz)
  * Returns: Pointer to a new byte, or NULL if there are no bytes remaining.
  */
 uint8_t *
-serial_pop(struct serial_descriptor *sb)
+serial_pop(struct serial_descriptor *s)
 {
     uint8_t *pop;
 
-    if (sb->sz > 0) {
-        pop = sb->buf++;
-        sb->sz--;
+    if (s->sz > 0) {
+        pop = s->buf++;
+        s->sz--;
 
-        if (sb->sz == 0) {
-            sb->flags &= ~SERIAL_BUSY;
+        if (s->sz == 0) {
+            s->flags &= ~SERIAL_BUSY;
 
-            if (sb->cb != NULL) {
-                sb->cb(sb->ctx);
+            if (s->cb != NULL) {
+                s->cb(s->ctx);
             }
         }
     } else {
@@ -114,29 +114,39 @@ serial_pop(struct serial_descriptor *sb)
  * left in the serial buffer.
  */
 uint8_t *
-serial_push(struct serial_descriptor *sb, uint8_t push)
+serial_push(struct serial_descriptor *s, uint8_t push)
 {
-    if (sb->sz > 0) {
-        *(sb->buf) = push;
-        sb->buf++;
-        sb->sz--;
+    if (s->sz > 0) {
+        *(s->buf) = push;
+        s->buf++;
+        s->sz--;
 
-        if (sb->sz == 0) {
-            sb->flags &= ~SERIAL_BUSY;
+        if (s->sz == 0) {
+            s->flags &= ~SERIAL_BUSY;
 
-            if (sb->cb != NULL) {
-                sb->cb(sb->ctx);
+            if (s->cb != NULL) {
+                s->cb(s->ctx);
             }
 
             return NULL;
         }
     }
 
-    return sb->buf;
+    return s->buf;
+}
+
+uint8_t *
+serial_peek(struct serial_descriptor *s)
+{
+    if (s->sz > 0) {
+        return s->buf;
+    }
+
+    return NULL;
 }
 
 uint16_t
-serial_get_sz(struct serial_descriptor *sb)
+serial_get_sz(struct serial_descriptor *s)
 {
-    return sb->sz;
+    return s->sz;
 }

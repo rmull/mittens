@@ -6,7 +6,6 @@
 #include "config.h"
 
 enum gpio_id {
-    GPIO_NONE,
     GPIO_A0,
     GPIO_A1,
     GPIO_A2,
@@ -51,6 +50,7 @@ enum gpio_id {
     GPIO_F1,
     GPIO_F2,
     GPIO_F3,
+    GPIO_NONE = 0xFF
 };
 
 void port_gpio_init(enum gpio_id id);

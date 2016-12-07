@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <string.h>
 
 #include "app.h"
@@ -7,7 +8,24 @@
 #include "os/gpio.h"
 #include "os/timer.h"
 #include "os/sleep.h"
+#include "os/uart.h"
 #include "driver/triac.h"
+
+/*
+ * TODO: Buttons on PF4 (SW1) and PF0 (SW2)
+ */
+
+/*
+ * Application descriptor: A place to store all of the state needed by your
+ * application.
+ */
+struct app_descriptor {
+    uint16_t tick;
+    struct max31855_descriptor max31855;
+    struct uart_descriptor uart_test;
+    uint16_t timer_b;
+    uint16_t timer_g;
+};
 
 struct app_descriptor app;
 const char version_string[] = "PRIMORDIAL MITTENS";
@@ -17,10 +35,9 @@ void app_demo_timer_cb(void *ctx);
 void
 app_demo_timer_cb(void *ctx)
 {
-    uint16_t *timer;
+    uint16_t *timer = (uint16_t *)ctx;
 
-    if (ctx != NULL) {
-        timer = (uint16_t *)ctx;
+    if (timer != NULL) {
 
         if (++(*timer) == 100) {
             *timer = 0;
@@ -31,11 +48,13 @@ app_demo_timer_cb(void *ctx)
                 gpio_toggle(GPIO_LED_B);
             }
             timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
+
         } else if (timer == &(app.timer_g)) {
             if (*timer == 0) {
                 gpio_toggle(GPIO_LED_G);
             }
             timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
+
         }
     }
 }
@@ -62,10 +81,12 @@ app_init(void)
     gpio_init(GPIO_LED_B);
     gpio_init(GPIO_TRIAC_IN);
 
-    max31855_init(&(app.max31855), GPIO_NONE);
+    max31855_init(&(app.max31855), SPI_ID_MAX31855, GPIO_NONE);
 
     triac_init();
     port_gpio_int_enable(GPIO_TRIAC_IN);
+
+    uart_init(UART_TEST, &(app.uart_test), 115200, "8N1");
 }
 
 void

@@ -12,16 +12,12 @@
 #define GPIO_LED_B      GPIO_F3
 #define GPIO_TRIAC_IN   GPIO_A7
 
-/*
- * Application descriptor: A place to store all of the state needed by your
- * application.
- */
-struct app_descriptor {
-    uint16_t tick;
-    struct max31855_descriptor max31855;
-    uint16_t timer_b;
-    uint16_t timer_g;
-};
+
+/* Name your SPI buses */
+#define SPI_ID_MAX31855         SPI_0
+
+/* Name your UARTs */
+#define UART_TEST               UART_1
 
 void app_init(void);
 void app_demo(void);

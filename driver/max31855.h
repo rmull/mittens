@@ -26,7 +26,8 @@ struct max31855_descriptor {
     uint8_t buf[MAX31855_BUF_SZ];
 };
 
-void max31855_init(struct max31855_descriptor *max31855, enum gpio_id cs);
+void max31855_init(struct max31855_descriptor *max31855, enum spi_id spi,
+                                                               enum gpio_id cs);
 int max31855_read(struct max31855_descriptor *max31855);
 
 #endif

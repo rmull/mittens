@@ -19,8 +19,6 @@
 
 #include "timer.h"
 
-#include "gpio.h"
-
 /* Global variables */
 struct timer_descriptor timer[TIMER_ID_TOTAL];
 
@@ -83,9 +81,8 @@ void
 timer_process(uint16_t ticks)
 {
     struct timer_descriptor *t_next = NULL;
-    uint8_t i;
 
-    for (i=0; i<TIMER_ID_TOTAL; i++) {
+    for (uint8_t i=0; i<TIMER_ID_TOTAL; i++) {
         if (timer[i].cb != NULL) {
             if (timer[i].deadline > ticks) {
                 timer[i].deadline -= ticks;

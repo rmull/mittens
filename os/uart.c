@@ -1,6 +1,9 @@
-#include "uart.h"
-
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "uart.h"
+#include "port/port_uart.h"
 
 void *int_ctx[UART_TOTAL];
 
@@ -56,3 +59,16 @@ uart_rx_set_cb(struct uart_descriptor *u, void (*cb)(void *ctx), void *ctx)
     return UART_OK;
 }
 
+void
+uart_init(enum uart_id id, struct uart_descriptor *u, uint32_t baud, char *mode)
+{
+    u->id = id;
+    u->baud = baud;
+    memcpy(u->mode, mode, 3);
+    uart_port_init(u->id, u->baud, u->mode);
+
+    while (1) {
+        uart_port_tx_byte(u->id, 'a');
+        uart_port_tx_byte(u->id, 'b');
+    }
+}
