@@ -9,7 +9,7 @@
  * TODO: Support full-duplex swaps
  */
 
-void *int_ctx[SPI_TOTAL];
+static void *int_ctx[SPI_TOTAL];
 
 void spi_tasks(struct spi_descriptor *spi);
 void spi_int_0(void);

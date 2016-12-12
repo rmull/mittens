@@ -28,7 +28,8 @@
  * Approach on Tiva: Use a pair of chained timers
  *
  */
-#include "os/timer.h"
+
+#include "port/port_timer.h"
 
 #include "triac.h"
 

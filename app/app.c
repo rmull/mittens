@@ -6,9 +6,10 @@
 #include "os/clock.h"
 #include "os/tick.h"
 #include "os/gpio.h"
-#include "os/timer.h"
+#include "os/sched.h"
 #include "os/sleep.h"
 #include "os/uart.h"
+#include "os/pwm.h"
 #include "driver/triac.h"
 
 /*
@@ -21,8 +22,11 @@
  */
 struct app_descriptor {
     uint16_t tick;
+    struct sched_descriptor sched;
+    struct task_descriptor tasks[TASK_ID_TOTAL];
     struct max31855_descriptor max31855;
     struct uart_descriptor uart_test;
+    struct pwm_descriptor pwm_servo;
     uint16_t timer_b;
     uint16_t timer_g;
 };
@@ -47,14 +51,13 @@ app_demo_timer_cb(void *ctx)
             if (*timer == 0) {
                 gpio_toggle(GPIO_LED_B);
             }
-            timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
+            sched_set(&(app.sched), TASK_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
 
         } else if (timer == &(app.timer_g)) {
             if (*timer == 0) {
                 gpio_toggle(GPIO_LED_G);
             }
-            timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
-
+            sched_set(&(app.sched), TASK_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
         }
     }
 }
@@ -63,8 +66,8 @@ app_demo_timer_cb(void *ctx)
 void
 app_demo_timer(void)
 {
-    timer_set(TIMER_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
-    timer_set(TIMER_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
+    sched_set(&(app.sched), TASK_ID_LED_B, 50000, app_demo_timer_cb, (void *)&(app.timer_b));
+    sched_set(&(app.sched), TASK_ID_LED_G, 25000, app_demo_timer_cb, (void *)&(app.timer_g));
 }
 
 void
@@ -74,7 +77,7 @@ app_init(void)
 
     clock_init();
     tick_init();
-    timer_init();
+    sched_init(&(app.sched), &(app.tasks[0]), TASK_ID_TOTAL, SCHED_TIMER, SCHED_RESOLUTION);
 
     gpio_init(GPIO_LED_R);
     gpio_init(GPIO_LED_G);
@@ -87,6 +90,9 @@ app_init(void)
     port_gpio_int_enable(GPIO_TRIAC_IN);
 
     uart_init(UART_TEST, &(app.uart_test), 115200, "8N1");
+
+    app_demo_timer();
+    //pwm_init(&(app.pwm_servo), PWM_SERVO);
 }
 
 void

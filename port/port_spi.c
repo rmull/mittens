@@ -26,10 +26,12 @@ spi_port_init(enum spi_id spi, uint32_t bitrate, uint8_t mode)
         GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_2);
         GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE,GPIO_PIN_3);
         GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_4);
+        GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE,GPIO_PIN_5);
 
         GPIOPinConfigure(GPIO_PA2_SSI0CLK);
         GPIOPinConfigure(GPIO_PA3_SSI0FSS);
         GPIOPinConfigure(GPIO_PA4_SSI0RX);
+        GPIOPinConfigure(GPIO_PA5_SSI0TX);
 
         GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4);
 

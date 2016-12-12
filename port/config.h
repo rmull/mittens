@@ -16,7 +16,6 @@
 
 /***************** port_timer.c/h **************/
 /* Period of the post-scaled clock for the tickless timer */
-#define TIMER_RESOLUTION    10000000        /* (1/TIMER_RESOLUTION) = 100ns */
 #define TRIAC_RESOLUTION    4000000         /* 60Hz AC -> 4MHz @ 16-bit is plenty */
 #define TRIAC_LATCH_TICKS   100             /* Minimum number of on-ticks to latch the triac */
 #define TRIAC_HALFWAVE_TICKS 33333          /* TRIAC_RESOLUTION * 0.00833333 */
@@ -26,13 +25,6 @@
 #define TIMER_PERIPH        TIMER0_BASE
 #define TIMER_TRIAC_PERIPH  TIMER1_BASE
 #endif
-
-/* Tickless timer names (timer.c/h) */
-enum timer_id {
-    TIMER_ID_LED_G,
-    TIMER_ID_LED_B,
-    TIMER_ID_TOTAL
-};
 
 /* Enumerate each MAX31855 in the system */
 enum max31855_id {
