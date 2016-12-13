@@ -12,6 +12,7 @@ struct task_descriptor {
 struct sched_descriptor {
     struct task_descriptor *tasks;
     uint8_t ntasks;
+    enum timer_hw_id timer;
 };
 
 void sched_init(struct sched_descriptor *s, struct task_descriptor *tasks, uint8_t count, enum timer_hw_id timer, uint32_t hz);

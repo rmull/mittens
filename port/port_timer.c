@@ -18,6 +18,7 @@ void timer_port_timer0_cb(void);
 void timer_port_timer1_cb(void);
 void timer_port_timer2_cb(void);
 void timer_port_timer3_cb(void);
+uint32_t timer_port_id_to_base(enum timer_hw_id timer);
 
 /*
  * TODO: The triac stuff is polluting this file.
@@ -62,6 +63,27 @@ timer_port_timer3_cb(void)
 
     if (int_cb[3] != NULL) {
         int_cb[3](int_ctx[3]);
+    }
+}
+
+uint32_t
+timer_port_id_to_base(enum timer_hw_id timer)
+{
+    switch (timer) {
+    case TIMER_0:
+        return TIMER0_BASE;
+
+    case TIMER_1:
+        return TIMER1_BASE;
+
+    case TIMER_2:
+        return TIMER2_BASE;
+
+    case TIMER_3:
+        return TIMER3_BASE;
+
+    default:
+        return 0;
     }
 }
 
@@ -120,21 +142,18 @@ timer_triac_port_init(void)
 //    TimerIntEnable(TIMER_TRIAC_PERIPH, TIMER_CAPA_EVENT);
 }
 
-
 void
 timer_port_callback_set(enum timer_hw_id timer, void (*cb)(void *ctx), void *ctx)
 {
-    uint32_t base;
+    uint32_t base = timer_port_id_to_base(timer);
     void (*fn)(void);
 
     switch (timer) {
     case TIMER_0:
-        base = TIMER0_BASE;
         fn = timer_port_timer0_cb;
         break;
 
     default:
-        base = 0;
         fn = NULL;
         break;
     }
@@ -148,9 +167,13 @@ timer_port_callback_set(enum timer_hw_id timer, void (*cb)(void *ctx), void *ctx
 }
 
 void
-timer_port_start(void)
+timer_port_start(enum timer_hw_id timer)
 {
-    TimerEnable(TIMER_PERIPH, TIMER_A);
+    uint32_t base = timer_port_id_to_base(timer);
+
+    if (base != 0) {
+        TimerEnable(base, TIMER_A);
+    }
 }
 
 void
@@ -206,11 +229,23 @@ timer_port_get_load(void)
 void
 timer_port_pwm_init(enum timer_hw_id timer)
 {
+    uint32_t period = (clock_port_get_freq() / 330) - 1;
+    uint32_t duty = (period * 50) / 100 - 1;
+
+    TimerEnable(TIMER_TRIAC_PERIPH, TIMER_A);
     switch (timer) {
     case TIMER_3:
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
         GPIOPinConfigure(GPIO_PB2_T3CCP0);
+        GPIOPinTypeTimer(GPIO_PORTB_BASE, GPIO_PIN_2);
+        SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3);
         TimerConfigure(TIMER3_BASE, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM);
+        TimerControlLevel(TIMER3_BASE, TIMER_A, 1);  /* PWM active low */
+        TimerPrescaleSet(TIMER3_BASE, TIMER_A, (period >> 16));
+        TimerLoadSet(TIMER3_BASE, TIMER_A, (period & 0xFFFF));
+        TimerPrescaleMatchSet(TIMER3_BASE, TIMER_A, (duty >> 16));
+        TimerMatchSet(TIMER3_BASE, TIMER_A, (duty & 0xFFFF));
+        TimerEnable(TIMER3_BASE, TIMER_A);
         break;
 
     default:
@@ -219,45 +254,48 @@ timer_port_pwm_init(enum timer_hw_id timer)
 }
 
 void
+timer_port_pwm_set_duty(enum timer_hw_id timer, uint32_t percent)
+{
+    uint32_t base = timer_port_id_to_base(timer);
+    uint32_t duty = (clock_port_get_freq() * percent) / 100 - 1;
+
+    if (base != 0) {
+        //TimerPrescaleSet(base, TIMER_A, (period >> 16) & 0xFFFF);
+        //TimerLoadSet(base, TIMER_A, (period & 0xFFFF));
+        TimerPrescaleMatchSet(base, TIMER_A, (duty >> 16) & 0xFFFF);
+        TimerMatchSet(base, TIMER_A, (duty & 0xFFFF));
+    }
+}
+
+void
+timer_port_pwm_set_freq(enum timer_hw_id timer, uint32_t match)
+{
+    TimerPrescaleSet(TIMER3_BASE, TIMER_A, (match >> 16));
+    TimerLoadSet(TIMER3_BASE, TIMER_A, (match & 0xFFFF));
+}
+
+void
 timer_port_set_freq(enum timer_hw_id timer, uint32_t hz)
 {
-    uint32_t base;
-
-    switch (timer) {
-    case TIMER_0:
-        base = TIMER0_BASE;
-        break;
-
-    case TIMER_3:
-        base = TIMER3_BASE;
-        break;
-
-    default:
-        base = 0;
-        break;
-    }
+    uint32_t base = timer_port_id_to_base(timer);
 
     if (base != 0) {
         TimerPrescaleSet(base, TIMER_A, (clock_port_get_freq() / hz) - 1);
+        //TimerPrescaleSet(base, TIMER_A, (hz >> 16) & 0xFFFF);
+        //TimerLoadSet(base, TIMER_A, (hz & 0xFFFF));
     }
 }
 
 uint32_t
 timer_port_get_freq(enum timer_hw_id timer)
 {
-    uint32_t hz;
+    uint32_t base = timer_port_id_to_base(timer);
 
-    switch (timer) {
-    case TIMER_3:
-        hz = clock_port_get_freq() / TimerPrescaleGet(TIMER3_BASE, TIMER_A);
-        break;
-
-    default:
-        hz = 0;
-        break;
+    if (base != 0) {
+        return clock_port_get_freq() / TimerPrescaleGet(timer_port_id_to_base(timer), TIMER_A);
     }
 
-    return hz;
+    return 0;
 }
 
 #endif

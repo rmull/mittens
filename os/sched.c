@@ -58,6 +58,7 @@ sched_init(struct sched_descriptor *s, struct task_descriptor *tasks, uint8_t sz
 
     s->tasks = tasks;
     s->ntasks = sz;
+    s->timer = timer;
 
     timer_port_init(timer);
     timer_port_set_freq(timer, hz);
@@ -91,7 +92,7 @@ sched_process(struct sched_descriptor *s, uint16_t ticks)
 
     if (t_next != NULL) {
         timer_port_set_load(t_next->deadline);
-        timer_port_start();
+        timer_port_start(s->timer);
     }
 }
 

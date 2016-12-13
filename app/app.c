@@ -92,8 +92,9 @@ app_init(void)
     uart_init(UART_TEST, &(app.uart_test), 115200, "8N1");
 
     app_demo_timer();
-    //pwm_init(&(app.pwm_servo), PWM_SERVO);
+    pwm_init(&(app.pwm_servo), PWM_SERVO, 330, 50);
 }
+
 
 void
 app_demo(void)
@@ -105,6 +106,8 @@ app_demo(void)
 
         max31855_read(&app.max31855);
     }
+
+    pwm_task(&app.pwm_servo);
 }
 
 void
