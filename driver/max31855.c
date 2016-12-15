@@ -15,7 +15,7 @@ max31855_init(struct max31855_descriptor *max31855, enum spi_id spi, enum gpio_i
     max31855->spi.rx = &(max31855->spi_rx);
     max31855->poll_period_ms = 500;
 
-    spi_init(spi, &(max31855->spi));
+    spi_init(spi, &(max31855->spi), 500000, 1);
 }
 
 /*

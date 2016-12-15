@@ -18,8 +18,10 @@ struct spi_descriptor {
 #define SPI_OK          0
 #define SPI_BUSY        -1
 
-void spi_init(enum spi_id id, struct spi_descriptor *sd);
+void spi_init(enum spi_id id, struct spi_descriptor *sd, uint32_t bitrate, uint8_t mode);
 int spi_read(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz,
+                                              void (*cb)(void *ctx), void *ctx);
+int spi_write(struct spi_descriptor *spi, uint8_t *buf, uint16_t sz,
                                               void (*cb)(void *ctx), void *ctx);
 
 #endif

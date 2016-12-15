@@ -87,19 +87,25 @@ serial_pop(struct serial_descriptor *s)
 {
     uint8_t *pop;
 
-    if (s->sz > 0) {
-        pop = s->buf++;
-        s->sz--;
+    if (s == NULL) {
+        pop = NULL;
 
-        if (s->sz == 0) {
-            s->flags &= ~SERIAL_BUSY;
+    } else {
+        if (s->sz > 0) {
+            pop = s->buf++;
+            s->sz--;
 
-            if (s->cb != NULL) {
-                s->cb(s->ctx);
+        } else {
+            pop = NULL;
+
+            if (s->flags & SERIAL_BUSY) {
+                s->flags &= ~SERIAL_BUSY;
+
+                if (s->cb != NULL) {
+                    s->cb(s->ctx);
+                }
             }
         }
-    } else {
-        pop = NULL;
     }
 
     return pop;
@@ -116,23 +122,33 @@ serial_pop(struct serial_descriptor *s)
 uint8_t *
 serial_push(struct serial_descriptor *s, uint8_t push)
 {
-    if (s->sz > 0) {
-        *(s->buf) = push;
-        s->buf++;
-        s->sz--;
+    if (s == NULL) {
+        return NULL;
 
-        if (s->sz == 0) {
-            s->flags &= ~SERIAL_BUSY;
+    } else {
 
-            if (s->cb != NULL) {
-                s->cb(s->ctx);
+        if (s->sz > 0) {
+            *(s->buf) = push;
+            s->buf++;
+            s->sz--;
+
+            if (s->sz == 0) {
+
+                s->flags &= ~SERIAL_BUSY;
+
+                if (s->cb != NULL) {
+                    s->cb(s->ctx);
+                }
+
+                return NULL;
             }
 
+            return s->buf;
+
+        } else {
             return NULL;
         }
     }
-
-    return s->buf;
 }
 
 uint8_t *
@@ -148,5 +164,8 @@ serial_peek(struct serial_descriptor *s)
 uint16_t
 serial_get_sz(struct serial_descriptor *s)
 {
+    if (s == NULL) {
+        return 0;
+    }
     return s->sz;
 }

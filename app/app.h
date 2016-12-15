@@ -14,6 +14,7 @@
 
 /* Name your SPI buses */
 #define SPI_ID_MAX31855         SPI_0
+#define SPI_ID_TLC5971          SPI_0
 
 /* Name your UARTs */
 #define UART_TEST               UART_1
