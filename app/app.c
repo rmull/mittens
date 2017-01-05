@@ -11,6 +11,7 @@
 #include "os/sleep.h"
 #include "os/uart.h"
 #include "os/pwm.h"
+#include "os/adc.h"
 #include "driver/triac.h"
 #include "driver/tlc5971.h"
 
@@ -89,6 +90,8 @@ app_init(void)
     gpio_init(GPIO_LED_B);
     gpio_init(GPIO_TRIAC_IN);
 
+    adc_init(ADC_0);
+
     spi_init(SPI_0, &(app.spi), 500000, 0);
 
     //max31855_init(&(app.max31855), SPI_ID_MAX31855, GPIO_NONE);
@@ -105,13 +108,21 @@ app_init(void)
 }
 
 
+uint16_t adc_result;
 void
 app_demo(void)
 {
-    if (tick_is_expired(&app.tick)) {
-        app.tick = tick_from_ms(5);
+    uint8_t i;
 
-        tlc5971_show(&(app.bgr_buf[0]), 12);
+    if (tick_is_expired(&app.tick)) {
+        app.tick = tick_from_ms(10);
+
+        adc_result = (uint16_t)(((uint32_t)adc_result + (adc_sample(ADC_0) << 3)) / 2);
+        for (i=0; i<12; i++) {
+            app.bgr_buf[i] = adc_result;
+        }
+
+        //tlc5971_show(&(app.bgr_buf[0]), 12);
         //tlc5971_testpattern(&(app.bgr_buf[0]), 12);
         tlc5971_set_bgr(&(app.tlc), &(app.bgr_buf[0]));
 
@@ -119,6 +130,7 @@ app_demo(void)
 
         //max31855_read(&app.max31855);
     }
+
 
     //pwm_task(&app.pwm_servo);
 }

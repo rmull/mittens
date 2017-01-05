@@ -3,6 +3,8 @@
 
 #include "pid.h"
 
+/* TODO: Untested work-in-progress */
+
 void
 pid_float_init(struct pid_float_descriptor *pid, float kp, float ki, float kd,
                float err_sum_max, float err_sum_min)
@@ -49,4 +51,4 @@ pid_float(struct pid_float_descriptor *pid, uint16_t sample)
     pid->err_prev = err;
 
     return (pid->kp * err) + (pid->ki * pid->err_sum) + (pid->kd * deriv);
-};
+}
