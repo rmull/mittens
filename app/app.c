@@ -12,6 +12,7 @@
 #include "os/uart.h"
 #include "os/pwm.h"
 #include "os/adc.h"
+#include "os/avg.h"
 #include "driver/triac.h"
 #include "driver/tlc5971.h"
 
@@ -24,7 +25,8 @@
  * application.
  */
 struct app_descriptor {
-    uint16_t tick;
+    uint16_t tlc5971_tick;
+    uint16_t adc_tick;
     struct sched_descriptor sched;
     struct task_descriptor tasks[TASK_ID_TOTAL];
     struct spi_descriptor spi;
@@ -32,6 +34,7 @@ struct app_descriptor {
     struct uart_descriptor uart_test;
     struct pwm_descriptor pwm_servo;
     struct tlc5971_descriptor tlc;
+    struct avg_descriptor adc_avg;
     uint16_t bgr_buf[12];
     uint16_t timer_b;
     uint16_t timer_g;
@@ -92,6 +95,8 @@ app_init(void)
 
     adc_init(ADC_0);
 
+    avg_init(&(app.adc_avg), 64);
+
     spi_init(SPI_0, &(app.spi), 500000, 0);
 
     //max31855_init(&(app.max31855), SPI_ID_MAX31855, GPIO_NONE);
@@ -108,16 +113,16 @@ app_init(void)
 }
 
 
-uint16_t adc_result;
 void
 app_demo(void)
 {
+    uint16_t adc_result;
     uint8_t i;
 
-    if (tick_is_expired(&app.tick)) {
-        app.tick = tick_from_ms(10);
+    if (tick_is_expired(&(app.tlc5971_tick))) {
+        app.tlc5971_tick = tick_from_ms(20);
 
-        adc_result = (uint16_t)(((uint32_t)adc_result + (adc_sample(ADC_0) << 3)) / 2);
+        adc_result = avg_get(&(app.adc_avg)) << 4;
         for (i=0; i<12; i++) {
             app.bgr_buf[i] = adc_result;
         }
@@ -129,6 +134,12 @@ app_demo(void)
         gpio_toggle(GPIO_LED_R);
 
         //max31855_read(&app.max31855);
+    }
+
+    if (tick_is_expired(&(app.adc_tick))) {
+        app.adc_tick = tick_from_ms(1);
+
+        avg_moving(&(app.adc_avg), adc_sample(ADC_0));
     }
 
 

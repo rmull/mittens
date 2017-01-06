@@ -1,6 +1,6 @@
 #include "app.h"
 
-void
+int
 main(void)
 {
     app_init();
@@ -11,4 +11,6 @@ main(void)
 
         //app_demo_sleep_task();
     }
+
+    return 0;
 }

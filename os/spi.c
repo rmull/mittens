@@ -25,7 +25,7 @@ spi_tasks(struct spi_descriptor *spi)
 
     data = spi_port_read(spi->id);
 
-    if (serial_get_sz(spi->tx) == 0 && serial_get_sz(spi->rx == 0)) {
+    if (serial_get_sz(spi->tx) == 0 && serial_get_sz(spi->rx) == 0) {
         spi_port_int_disable(spi->id);
     }
 
