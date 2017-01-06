@@ -13,6 +13,5 @@ void pwm_init(struct pwm_descriptor *pwm, enum timer_hw_id timer, uint32_t hz, u
 void pwm_set_duty(struct pwm_descriptor *pwm, uint32_t duty);
 void pwm_set_freq(struct pwm_descriptor *pwm, uint32_t hz);
 uint32_t pwm_get_freq(struct pwm_descriptor *pwm);
-void pwm_task(struct pwm_descriptor *pwm);
 
 #endif

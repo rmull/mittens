@@ -26,6 +26,7 @@
  */
 struct app_descriptor {
     uint16_t tlc5971_tick;
+    uint16_t servo_tick;
     uint16_t adc_tick;
     struct sched_descriptor sched;
     struct task_descriptor tasks[TASK_ID_TOTAL];
@@ -95,34 +96,39 @@ app_init(void)
 
     adc_init(ADC_0);
 
-    avg_init(&(app.adc_avg), 64);
+    avg_init(&(app.adc_avg), 8192);
 
     spi_init(SPI_0, &(app.spi), 500000, 0);
 
     //max31855_init(&(app.max31855), SPI_ID_MAX31855, GPIO_NONE);
 
-    //triac_init();
+    triac_init();
     //port_gpio_int_enable(GPIO_TRIAC_IN);
 
     //uart_init(UART_TEST, &(app.uart_test), 115200, "8N1");
 
     //app_demo_timer();
-    //pwm_init(&(app.pwm_servo), PWM_SERVO, 330, 50);
+    pwm_init(&(app.pwm_servo), PWM_SERVO, 330, 50);
 
     tlc5971_init(&(app.tlc), &(app.spi), 1);
 }
 
-
+uint16_t servo_last;
 void
 app_demo(void)
 {
-    uint16_t adc_result;
+    uint16_t adc_result = avg_get(&(app.adc_avg)) << 4;
     uint8_t i;
+
+    if (tick_is_expired(&(app.adc_tick))) {
+        app.adc_tick = tick_from_ms(1);
+
+        avg_moving(&(app.adc_avg), adc_sample(ADC_0));
+    }
 
     if (tick_is_expired(&(app.tlc5971_tick))) {
         app.tlc5971_tick = tick_from_ms(20);
 
-        adc_result = avg_get(&(app.adc_avg)) << 4;
         for (i=0; i<12; i++) {
             app.bgr_buf[i] = adc_result;
         }
@@ -133,17 +139,21 @@ app_demo(void)
 
         gpio_toggle(GPIO_LED_R);
 
+
         //max31855_read(&app.max31855);
     }
 
-    if (tick_is_expired(&(app.adc_tick))) {
-        app.adc_tick = tick_from_ms(1);
+    if (tick_is_expired(&(app.servo_tick))) {
+        app.servo_tick = tick_from_ms(10);
 
-        avg_moving(&(app.adc_avg), adc_sample(ADC_0));
+        /* Small deadband */
+        /* TODO: Add deadband to PWM? */
+        if ((adc_result > servo_last+16) || (adc_result < servo_last-16)) {
+            pwm_set_freq(&(app.pwm_servo), 50000+(((190000-50000)/0xFFFF)*adc_result));
+            servo_last = adc_result;
+        }
     }
 
-
-    //pwm_task(&app.pwm_servo);
 }
 
 void

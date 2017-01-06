@@ -23,7 +23,7 @@ void timer_triac_port_start(void);
 void timer_port_stop();
 uint16_t timer_port_get_tick();
 void timer_port_set_load(uint16_t target);
-void timer_port_pwm_set_freq(enum timer_hw_id timer, uint32_t match);
+void timer_port_pwm_set_freq(enum timer_hw_id timer, uint32_t freq, uint32_t duty);
 void timer_triac_port_set_load(uint16_t target);
 uint16_t timer_port_get_load(void);
 void timer_port_int_clear(void);

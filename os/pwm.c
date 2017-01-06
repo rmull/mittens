@@ -6,10 +6,12 @@
 #include "pwm.h"
 
 void
-pwm_set_freq(struct pwm_descriptor *pwm, uint32_t hz)
+pwm_set_freq(struct pwm_descriptor *pwm, uint32_t freq)
 {
-    pwm->hz = hz;
-    timer_port_set_freq(pwm->timer, hz);
+    if (pwm->hz != freq) {
+        pwm->hz = freq;
+        timer_port_pwm_set_freq(pwm->timer, freq, pwm->duty);
+    }
 }
 
 void
@@ -39,12 +41,4 @@ uint32_t
 pwm_get_freq(struct pwm_descriptor *pwm)
 {
     return 0;
-}
-
-
-static uint32_t match = 121211;
-void
-pwm_task(struct pwm_descriptor *pwm)
-{
-    timer_port_pwm_set_freq(pwm->timer, match);
 }

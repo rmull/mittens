@@ -232,7 +232,6 @@ timer_port_pwm_init(enum timer_hw_id timer)
     uint32_t period = (clock_port_get_freq() / 330) - 1;
     uint32_t duty = (period * 50) / 100 - 1;
 
-    TimerEnable(TIMER_TRIAC_PERIPH, TIMER_A);
     switch (timer) {
     case TIMER_3:
         SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
@@ -260,18 +259,28 @@ timer_port_pwm_set_duty(enum timer_hw_id timer, uint32_t percent)
     uint32_t duty = (clock_port_get_freq() * percent) / 100 - 1;
 
     if (base != 0) {
-        //TimerPrescaleSet(base, TIMER_A, (period >> 16) & 0xFFFF);
-        //TimerLoadSet(base, TIMER_A, (period & 0xFFFF));
         TimerPrescaleMatchSet(base, TIMER_A, (duty >> 16) & 0xFFFF);
         TimerMatchSet(base, TIMER_A, (duty & 0xFFFF));
     }
 }
 
 void
-timer_port_pwm_set_freq(enum timer_hw_id timer, uint32_t match)
+timer_port_pwm_set_freq(enum timer_hw_id timer, uint32_t freq, uint32_t duty)
 {
-    TimerPrescaleSet(TIMER3_BASE, TIMER_A, (match >> 16));
-    TimerLoadSet(TIMER3_BASE, TIMER_A, (match & 0xFFFF));
+    uint32_t duty_new = (freq * duty) / 100 - 1;
+
+    switch (timer) {
+    case TIMER_3:
+        //TimerDisable(TIMER3_BASE, TIMER_A);
+        TimerPrescaleSet(TIMER3_BASE, TIMER_A, (freq >> 16));
+        TimerLoadSet(TIMER3_BASE, TIMER_A, (freq & 0xFFFF));
+        TimerPrescaleMatchSet(TIMER3_BASE, TIMER_A, (duty_new >> 16));
+        TimerMatchSet(TIMER3_BASE, TIMER_A, (duty_new & 0xFFFF));
+        //TimerEnable(TIMER3_BASE, TIMER_A);
+        break;
+    default:
+        break;
+    }
 }
 
 void
