@@ -98,7 +98,7 @@ app_init(void)
 
     avg_init(&(app.adc_avg), 8192);
 
-    spi_init(SPI_0, &(app.spi), 500000, 0);
+    spi_init(SPI_0, &(app.spi), 5000000, 0);
 
     //max31855_init(&(app.max31855), SPI_ID_MAX31855, GPIO_NONE);
 
@@ -127,14 +127,14 @@ app_demo(void)
     }
 
     if (tick_is_expired(&(app.tlc5971_tick))) {
-        app.tlc5971_tick = tick_from_ms(20);
+        app.tlc5971_tick = tick_from_ms(50);
 
-        for (i=0; i<12; i++) {
-            app.bgr_buf[i] = adc_result;
-        }
-
-        //tlc5971_show(&(app.bgr_buf[0]), 12);
+        //for (i=0; i<12; i++) {
+        //    app.bgr_buf[i] = adc_result;
+        //}
+        tlc5971_show(&(app.bgr_buf[0]), 4);
         //tlc5971_testpattern(&(app.bgr_buf[0]), 12);
+
         tlc5971_set_bgr(&(app.tlc), &(app.bgr_buf[0]));
 
         gpio_toggle(GPIO_LED_R);
@@ -144,7 +144,7 @@ app_demo(void)
     }
 
     if (tick_is_expired(&(app.servo_tick))) {
-        app.servo_tick = tick_from_ms(10);
+        app.servo_tick = tick_from_ms(30);
 
         /* Small deadband */
         /* TODO: Add deadband to PWM? */

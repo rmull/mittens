@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <math.h>
+#include <stdlib.h>
 
 #include "driver/tlc5971.h"
 
@@ -85,6 +85,7 @@ show_flicker(void)
 
     return 1;
 }
+#endif
 
 #define MASK 0x80000057
 uint32_t random_number = 1;
@@ -104,35 +105,21 @@ random(void)
     return((uint16_t)random_number);
 }
 
-uint8_t channel_count = 0;
-uint16_t delay_loop = 0;
-int
-show_noise(void)
+void
+tlc5971_show_noise(uint8_t npx)
 {
-    uint8_t i;
+    unsigned int randval;
 
-    if (delay_loop++ == 0x0700) {
-        delay_loop = 0;
-        for (i=0; i<TLC_NPIXELS; i++) {
-            if (i == channel_count) {
-                tlc.color[i].r = random();
-                tlc.color[i].g = random();
-                tlc.color[i].b = random();
-                tlc.color[i].w = random();
-                break;
-            }
-        }
+    rand_r(&randval);
 
-        if (++channel_count >= TLC_NPIXELS) {
-            channel_count = 0;
-        }
+    randval %= 0x7FFF;
 
-        return 1;
+    for (uint8_t i=0; i<npx; i++) {
+            tlcc[i].r = randval;
+            tlcc[i].g = randval;
+            tlcc[i].b = randval;
     }
-
-    return 0;
 }
-#endif
 
 void
 tlc5971_color_to_buf(struct tlc5971_color *color, uint16_t *buf)
@@ -158,7 +145,7 @@ tlc5971_show_wash(uint8_t npx)
 #define THROBSTEP 200
 uint16_t throb = 0xFFFF;
 #define THROB_LOCK      0x1FF
-uint8_t up = 2;
+uint8_t up = 0;
 void
 tlc5971_show_throb(uint8_t npx)
 {
@@ -251,10 +238,11 @@ void
 tlc5971_show(uint16_t *dest_buf, uint8_t npx)
 {
     //tlc5971_show_wash(npx);
-    tlc5971_show_throb(npx);
+    //tlc5971_show_throb(npx);
+    tlc5971_show_noise(npx);
 
     for (uint8_t i=0; i<npx; i++) {
-		tlc5971_color_to_buf(&tlcc[i], &dest_buf[i*3]);
+        tlc5971_color_to_buf(&tlcc[i], &dest_buf[i*3]);
     }
 }
 

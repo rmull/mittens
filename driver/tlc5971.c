@@ -92,6 +92,22 @@ uint16_t htons(uint16_t x)
     return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
 }
 
+#include <math.h>
+void
+tlc5971_gamma_correct(uint16_t *bgr, uint8_t nchan)
+{
+    for (uint8_t i=0; i<nchan; i++) {
+        if (bgr[i] > 0) {
+            bgr[i] = (uint16_t)(pow((float)bgr[i] / 0xFFFF, 2.8) * 0xFFFF + 0.5);
+            if (bgr[i] == 0) {
+                bgr[i] = 1;
+            }
+        } else {
+            bgr[i] = 0;
+        }
+    }
+}
+
 void
 tlc5971_set_bgr(struct tlc5971_descriptor *tlc, uint16_t *bgr)
 {
@@ -99,13 +115,15 @@ tlc5971_set_bgr(struct tlc5971_descriptor *tlc, uint16_t *bgr)
         return;
     }
 
+    //tlc5971_gamma_correct(bgr, TLC_NCHANS);
+
     /* Attach color data to the TLC5971 descriptor */
     tlc->bgr = bgr;
 
     tlc->state = TLC_STATE_HEADER;
 
     /* Convert from host to network byte order in place */
-    for (uint8_t i=0; i<12; i++) {
+    for (uint8_t i=0; i<TLC_NCHANS; i++) {
         tlc->bgr[i] = htons(tlc->bgr[i]);
     }
 
