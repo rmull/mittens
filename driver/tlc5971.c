@@ -112,7 +112,7 @@ void
 tlc5971_set_bgr(struct tlc5971_descriptor *tlc, uint16_t *bgr)
 {
     if (tlc == NULL || bgr == NULL) {
-        return;
+        while(1);
     }
 
     //tlc5971_gamma_correct(bgr, TLC_NCHANS);
@@ -138,10 +138,6 @@ tlc5971_set_bgr(struct tlc5971_descriptor *tlc, uint16_t *bgr)
 void
 tlc5971_poll(struct tlc5971_descriptor *tlc)
 {
-    if (tlc == NULL) {
-            return;
-    }
-
     switch (tlc->state) {
     case TLC_STATE_WAITLATCH:
         tlc->state = TLC_STATE_IDLE;

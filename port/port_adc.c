@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include "port_adc.h"
 
 #ifdef API_TIVAWARE

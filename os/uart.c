@@ -59,6 +59,15 @@ uart_rx_set_cb(struct uart_descriptor *u, void (*cb)(void *ctx), void *ctx)
     return UART_OK;
 }
 
+/*
+ * This is a blocking function
+ */
+void
+uart_tx_byte(struct uart_descriptor *u, uint8_t byte)
+{
+    uart_port_tx_byte(u->id, byte);
+}
+
 void
 uart_init(enum uart_id id, struct uart_descriptor *u, uint32_t baud, char *mode)
 {
@@ -66,11 +75,4 @@ uart_init(enum uart_id id, struct uart_descriptor *u, uint32_t baud, char *mode)
     u->baud = baud;
     memcpy(u->mode, mode, 3);
     uart_port_init(u->id, u->baud, u->mode);
-
-    /* TODO: DEBUG
-    while (1) {
-        uart_port_tx_byte(u->id, 'a');
-        uart_port_tx_byte(u->id, 'b');
-    }
-    */
 }

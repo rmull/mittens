@@ -1,6 +1,8 @@
 #ifndef PORT_ADC_H_
 #define PORT_ADC_H_
 
+#include <stdint.h>
+
 #include "config.h"
 
 enum adc_hw_id {

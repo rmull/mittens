@@ -4,42 +4,9 @@
 #include "app.h"
 #include "tlc5971_show.h"
 
-#include "os/clock.h"
-#include "os/tick.h"
-#include "os/gpio.h"
-#include "os/sched.h"
-#include "os/sleep.h"
-#include "os/uart.h"
-#include "os/pwm.h"
-#include "os/adc.h"
-#include "os/avg.h"
-#include "driver/triac.h"
-#include "driver/tlc5971.h"
-
 /*
  * TODO: Buttons on PF4 (SW1) and PF0 (SW2)
  */
-
-/*
- * Application descriptor: A place to store all of the state needed by your
- * application.
- */
-struct app_descriptor {
-    uint16_t tlc5971_tick;
-    uint16_t servo_tick;
-    uint16_t adc_tick;
-    struct sched_descriptor sched;
-    struct task_descriptor tasks[TASK_ID_TOTAL];
-    struct spi_descriptor spi;
-    struct max31855_descriptor max31855;
-    struct uart_descriptor uart_test;
-    struct pwm_descriptor pwm_servo;
-    struct tlc5971_descriptor tlc;
-    struct avg_descriptor adc_avg;
-    uint16_t bgr_buf[12];
-    uint16_t timer_b;
-    uint16_t timer_g;
-};
 
 struct app_descriptor app;
 const char version_string[] = "PRIMORDIAL MITTENS";
@@ -105,7 +72,10 @@ app_init(void)
     triac_init();
     //port_gpio_int_enable(GPIO_TRIAC_IN);
 
-    //uart_init(UART_TEST, &(app.uart_test), 115200, "8N1");
+    uart_init(UART_TEST, &(app.uart_test), 9600, "8N1");
+
+    serlcd_init(&(app.serlcd), &(app.uart_test));
+    serlcd_print_string(&(app.serlcd), "ADC Value");
 
     //app_demo_timer();
     pwm_init(&(app.pwm_servo), PWM_SERVO, 330, 50);
@@ -118,7 +88,6 @@ void
 app_demo(void)
 {
     uint16_t adc_result = avg_get(&(app.adc_avg)) << 4;
-    uint8_t i;
 
     if (tick_is_expired(&(app.adc_tick))) {
         app.adc_tick = tick_from_ms(1);
@@ -139,7 +108,6 @@ app_demo(void)
 
         gpio_toggle(GPIO_LED_R);
 
-
         //max31855_read(&app.max31855);
     }
 
@@ -154,6 +122,11 @@ app_demo(void)
         }
     }
 
+    if (tick_is_expired(&(app.lcd_tick))) {
+        app.lcd_tick = tick_from_ms(500);
+        serlcd_set_cursor(&(app.serlcd), SERLCD_ROW1_POS);
+        serlcd_print_decimal(&(app.serlcd), adc_result);
+    }
 }
 
 void

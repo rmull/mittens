@@ -27,10 +27,11 @@ struct uart_descriptor {
 #define UART_OK         0
 #define UART_ERROR      -1
 
-int uart_rx(struct uart_descriptor *u, uint8_t *buf, uint16_t sz);
-int uart_tx(struct uart_descriptor *u, uint8_t *buf, uint16_t sz);
-int uart_tx_set_cb(struct uart_descriptor *u, void (*cb)(void *ctx), void *ctx);
-int uart_rx_set_cb(struct uart_descriptor *u, void (*cb)(void *ctx), void *ctx);
-void uart_init(enum uart_id id, struct uart_descriptor *u, uint32_t baud, char *mode);
+int uart_rx(struct uart_descriptor *, uint8_t *, uint16_t);
+int uart_tx(struct uart_descriptor *, uint8_t *, uint16_t);
+void uart_tx_byte(struct uart_descriptor *, uint8_t);
+int uart_tx_set_cb(struct uart_descriptor *, void (*)(void *), void *);
+int uart_rx_set_cb(struct uart_descriptor *, void (*)(void *), void *);
+void uart_init(enum uart_id, struct uart_descriptor *, uint32_t, char *);
 
 #endif
