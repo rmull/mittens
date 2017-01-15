@@ -57,4 +57,46 @@ uart_port_tx_byte(enum uart_id uart, uint8_t byte)
     }
 }
 
+void
+uart_port_int_clear(enum uart_id id)
+{
+    uint32_t base;
+
+    switch (id) {
+    case 0:
+        base = UART0_BASE;
+        break;
+    default:
+        base = 0;
+        break;
+    }
+
+    /*
+     * TODO: This clears all interrupts associated with the UART, which isn't
+     * always going to be what we want.
+     */
+    if (base != 0) {
+        UARTIntClear(base, 0xFFFFFFFF);
+    }
+}
+
+void
+uart_port_tx_byte_nonblocking(enum uart_id id, uint8_t byte)
+{
+    uint32_t base;
+
+    switch (id) {
+    case 0:
+        base = UART0_BASE;
+        break;
+    default:
+        base = 0;
+        break;
+    }
+
+    if (base != 0) {
+        UARTCharPutNonBlocking(base, byte);
+    }
+}
+
 #endif

@@ -33,5 +33,6 @@ void uart_tx_byte(struct uart_descriptor *, uint8_t);
 int uart_tx_set_cb(struct uart_descriptor *, void (*)(void *), void *);
 int uart_rx_set_cb(struct uart_descriptor *, void (*)(void *), void *);
 void uart_init(enum uart_id, struct uart_descriptor *, uint32_t, char *);
+void uart_tx_byte_nonblocking(struct uart_descriptor *, uint8_t);
 
 #endif

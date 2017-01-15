@@ -15,7 +15,9 @@ enum uart_id {
     UART_TOTAL
 };
 
-void uart_port_init(enum uart_id uart, uint32_t baud, char *mode_str);
-void uart_port_tx_byte(enum uart_id uart, uint8_t byte);
+void uart_port_init(enum uart_id, uint32_t, char *);
+void uart_port_int_clear(enum uart_id);
+void uart_port_tx_byte(enum uart_id, uint8_t);
+void uart_port_tx_byte_nonblocking(enum uart_id, uint8_t);
 
 #endif

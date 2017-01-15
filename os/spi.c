@@ -14,9 +14,6 @@ static void *int_ctx[SPI_TOTAL];
 void spi_tasks(struct spi_descriptor *spi);
 void spi_int_0(void);
 
-/*
- * TODO: Could eventually use this as part of a interrupt-free polled setup
- */
 void
 spi_tasks(struct spi_descriptor *spi)
 {
@@ -45,7 +42,7 @@ spi_tasks(struct spi_descriptor *spi)
 void
 spi_int_0(void)
 {
-    struct spi_descriptor *spi = (struct spi_descriptor *)int_ctx[0];
+    struct spi_descriptor *spi = (struct spi_descriptor *)int_ctx[SPI_0];
 
     spi_port_int_clear(SPI_0);
 

@@ -25,6 +25,9 @@ enum serlcd_id {
 #define SERLCD_DISP_CLEAR       0x01
 #define SERLCD_DISP_CURSOR_POS  0x80
 
+/* Config controls */
+#define SERLCD_CFG_BACKLIGHT    0x80
+
 struct serlcd_descriptor {
     struct uart_descriptor *uart;
 };
@@ -33,6 +36,7 @@ void serlcd_init(struct serlcd_descriptor *, struct uart_descriptor *);
 void serlcd_print_string(struct serlcd_descriptor *, char *);
 void serlcd_control(struct serlcd_descriptor *, uint8_t);
 void serlcd_set_cursor(struct serlcd_descriptor *, uint8_t);
-void serlcd_print_decimal(struct serlcd_descriptor *sl, uint32_t num);
+void serlcd_print_decimal(struct serlcd_descriptor *, uint32_t);
+void serlcd_set_backlight(struct serlcd_descriptor *, uint8_t);
 
 #endif

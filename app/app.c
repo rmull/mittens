@@ -75,6 +75,7 @@ app_init(void)
     uart_init(UART_TEST, &(app.uart_test), 9600, "8N1");
 
     serlcd_init(&(app.serlcd), &(app.uart_test));
+    //serlcd_set_backlight(&(app.serlcd), 29);
     serlcd_print_string(&(app.serlcd), "ADC Value");
 
     //app_demo_timer();

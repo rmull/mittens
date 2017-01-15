@@ -64,4 +64,12 @@ serlcd_print_decimal(struct serlcd_descriptor *sl, uint32_t num)
     }
 }
 
-
+void
+serlcd_set_backlight(struct serlcd_descriptor *sl, uint8_t level)
+{
+    if (level > 29) {
+        level = 29;
+    }
+    uart_tx_byte(sl->uart, SERLCD_CTRL_CONFIG);
+    uart_tx_byte(sl->uart, SERLCD_CFG_BACKLIGHT+level);
+}
